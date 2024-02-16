@@ -1,4 +1,4 @@
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/c3421c79-4a0b-4d15-b133-cae161accd6f)Introduction
+Introduction
 In this case study, I will perform tasks of a junior data analyst at a company. In order to answer the key business questions, I will follow the steps of the data analysis process: Ask, Prepare, Process, Analyze, Share, and Act.
 
 Quick links:
@@ -57,25 +57,22 @@ Analyze process :
 Q : A summary of my analysis
 A : 
 1. The average trip duration for the casual rider is more than that of average trip durations of the members.
-
-   
 2.  During summer months number of rides at its highest level for both casual and member riders.
-   
-4. Most of the riders are member users.
-   
-6. Classic bikes are the most popular kind.
-   
-8. Only casual users use docked bikes, membership users prefer classic bikes and both of use the electric bikes almost equally.
-   
-
-10. There is a seasonal trend in ridership by both casual and member riders. Can see that the rise in no of rides during summer (July to September) and during summer the casual ridership surpasses member ridership.
-   
-12. In weekends casual riders' ride length is maximum when compared to Weekdays. Members' ride length tend to be almost same in all weekdays
-    
-14. The average ride length by casual riders is more than twice the members in the same year (2023).
+![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/d788a6a2-3320-4864-baec-101124f12091)
+![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/4e00f206-7709-4e95-92b6-3195e36036c0)
 
 
+3. Most of the riders are member users.
+4. Classic bikes are the most popular kind.
+5. Only casual users use docked bikes, membership users prefer classic bikes and both of use the electric bikes almost equally.
+![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/ee609919-cae6-49ad-9039-65a95c994bdd)
+![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/03935dda-91ce-44b0-96a1-8a3e05086dce)
 
+6. There is a seasonal trend in ridership by both casual and member riders. Can see that the rise in no of rides during summer (July to September) and during summer the casual ridership surpasses member ridership.
+7. In weekends casual riders' ride length is maximum when compared to Weekdays. Members' ride length tend to be almost same in all weekdays 
+8. The average ride length by casual riders is more than twice the members in the same year (2023).
+![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/6e8ecd04-6f64-4c95-9cc1-7086867d2c50)
+![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/b39ba1b5-4734-4805-88ca-3a3367158413)
 
 Share process : 
 Q : How annual members and casual riders use Company’s bikes differently? 
