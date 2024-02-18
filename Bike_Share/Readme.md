@@ -7,9 +7,11 @@ Data Source: divvy_tripdata (https://divvy-tripdata.s3.amazonaws.com/index.html)
 Python Data Visualization
 
 Introduction: 
+
 follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act. 
 
 Scenario: 
+
 Data analyst working in the marketing analyst team at Company, a bike-share company in City. 
 The director of marketing believes the company’s future success depends on maximizing the number of annual memberships. 
 Therefore, team wants to understand how casual riders and annual members use Company bikes differently. 
@@ -17,6 +19,7 @@ From these insights, my team will design a new marketing strategy to convert cas
 
 
 Characters and teams :
+
 A: The director of marketing and my manager. 
 
 Marketing analytics team: A team of data analysts who are responsible for collecting, analyzing, and reporting data that helps guide Company marketing strategy. 
@@ -25,6 +28,7 @@ Executive team: The notoriously detail-oriented executive team will decide wheth
 
 
 About Company:
+
 offers bike-sharing across City with over 10000 bikes at 1000 stations. They rely on flexible pricing with single-ride, day passes, and annual memberships.
 Problem: While attracting customers, we want to increase annual members who are more profitable.
 Solution: Convert existing casual riders to members. Casual riders already know and use, making them prime targets.
@@ -42,20 +46,28 @@ Produce a report with the deliverables:
 
 
 Ask process : 
+
 Q : Identify the business task
 A : To find out how casual riders and annual members use bikes differently. From these insights, would help team to design a new marketing strategy to convert casual riders into annual members.
 
+
 Prepare process : 
+
 Q: A description of all data sources used 
 A : Motivate International Inc. has provided the available data. It is public data suitable for examining the usage patterns of various customer segments regarding bikes. While the data is currently disorganized, it only requires cleaning; all files are readable. It adheres to the ROCCC principles. Data Organization, Process, Combining the Data, Data Exploration,Observations, Data Cleaning, 
 
+
 Process process : 
+
 Q : Documentation of any cleaning or manipulation of data
 A : Using python in Jupyter notebook helps notify and adjusting in short period of time, by running code in a line with short time, and gives out result after running saving lots of time, therefore I can check the data every now and then, and it can document every steps I take.
 
+
 Analyze process : 
+
 Q : A summary of my analysis
 A : 
+
 1. The average trip duration for the casual rider is more than that of average trip durations of the members.
 2.  During summer months number of rides at its highest level for both casual and member riders.
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/d788a6a2-3320-4864-baec-101124f12091)
@@ -75,7 +87,9 @@ A :
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/b39ba1b5-4734-4805-88ca-3a3367158413)
 
 Share process : 
-Q : How annual members and casual riders use Company’s bikes differently? 
+
+Q : How annual members and casual riders use Company’s bikes differently?
+
 A : 
 Based on the analyze, the data can be sort in three site.
 1. Trip Frequency and Duration:
@@ -88,7 +102,9 @@ Annual members: Prefer classic bikes but also use electric bikes nearly as much.
 Both groups: Ride most frequently during summer months, aligning with leisure activities and potentially warmer weather encouraging cycling.
 
 Act process : 
+
 My top three recommendations based on analysis
+
 
 For casual riders: 
 1. Highlight the convenience and affordability of classic bikes for leisure activities.
