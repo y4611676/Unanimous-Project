@@ -48,24 +48,28 @@ Produce a report with the deliverables:
 Ask process : 
 
 Q : Identify the business task
+
 A : To find out how casual riders and annual members use bikes differently. From these insights, would help team to design a new marketing strategy to convert casual riders into annual members.
 
 
 Prepare process : 
 
 Q: A description of all data sources used 
+
 A : Motivate International Inc. has provided the available data. It is public data suitable for examining the usage patterns of various customer segments regarding bikes. While the data is currently disorganized, it only requires cleaning; all files are readable. It adheres to the ROCCC principles. Data Organization, Process, Combining the Data, Data Exploration,Observations, Data Cleaning, 
 
 
 Process process : 
 
 Q : Documentation of any cleaning or manipulation of data
+
 A : Using python in Jupyter notebook helps notify and adjusting in short period of time, by running code in a line with short time, and gives out result after running saving lots of time, therefore I can check the data every now and then, and it can document every steps I take.
 
 
 Analyze process : 
 
 Q : A summary of my analysis
+
 A : 
 
 1. The average trip duration for the casual rider is more than that of average trip durations of the members.
@@ -91,6 +95,7 @@ Share process :
 Q : How annual members and casual riders use Company’s bikes differently?
 
 A : 
+
 Based on the analyze, the data can be sort in three site.
 1. Trip Frequency and Duration:
 Casual riders: Take fewer rides overall but their individual rides tend to be longer, especially on weekends, suggesting they use bikes for leisure or personal activities.
@@ -107,11 +112,13 @@ My top three recommendations based on analysis
 
 
 For casual riders: 
+
 1. Highlight the convenience and affordability of classic bikes for leisure activities.
 2. Offer weekend promotions or discounts to encourage more frequent usage.
 3. Consider promoting docked bikes in specific areas popular for sightseeing or recreation.
 
 For converting casual riders to annual members: 
+
 1. Emphasize the cost savings of an annual membership compared to frequent casual rides.
 2. Showcase the versatility of classic and electric bikes for commuting, errands, and leisure.
 3. Target marketing campaigns during the summer months when cycling is most popular.
