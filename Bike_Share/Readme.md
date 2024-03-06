@@ -6,10 +6,6 @@ Data Source: divvy_tripdata (https://divvy-tripdata.s3.amazonaws.com/index.html)
 
 Python Data Visualization
 
-Introduction: 
-
-follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act. 
-
 Scenario: 
 
 Data analyst working in the marketing analyst team at Company, a bike-share company in City. 
