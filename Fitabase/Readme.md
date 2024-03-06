@@ -9,27 +9,27 @@ Scenario:
 3. Examining consumer usage patterns and deriving insights to shape the company's marketing strategy.
 
 Characters:
-- Ur : Co-founder and Chief Creative Officer of Bx.
-- Mur: Co-founder and mathematician, a key member of the Bx executive team.
-- Bx marketing analytics team: A group of data analysts responsible for collecting, analyzing, and reporting data to guide Bx’s marketing strategy.
+- Ur : Co-founder and Chief Creative Officer of Company.
+- Mur: Co-founder and mathematician, a key member of the Company executive team.
+- Company marketing analytics team: A group of data analysts responsible for collecting, analyzing, and reporting data to guide Company’s marketing strategy.
 
 Products:
-- Bx app: Provides users with health data on activity, sleep, stress, menstrual cycle, and mindfulness habits. It connects to Bx's smart wellness products.
-- Leaf: Bx’s classic wellness tracker worn as a bracelet, necklace, or clip, tracks activity, sleep, and stress.
-- Time: A wellness watch combining a classic timepiece with smart technology to track activity, sleep, and stress. It connects to the Bx app.
-- Spring: A water bottle that tracks daily water intake using smart technology, connects to the Bx app to monitor hydration levels.
-- Bx membership: A subscription-based program providing users with personalized guidance on nutrition, activity, sleep, health and beauty, and mindfulness, tailored to their lifestyle and goals.
+- Company app: Provides users with health data on activity, sleep, stress, menstrual cycle, and mindfulness habits. It connects to Company's smart wellness products.
+- Leaf: Company’s classic wellness tracker worn as a bracelet, necklace, or clip, tracks activity, sleep, and stress.
+- Time: A wellness watch combining a classic timepiece with smart technology to track activity, sleep, and stress. It connects to the Company app.
+- Spring: A water bottle that tracks daily water intake using smart technology, connects to the Company app to monitor hydration levels.
+- Company membership: A subscription-based program providing users with personalized guidance on nutrition, activity, sleep, health and beauty, and mindfulness, tailored to their lifestyle and goals.
 
 
 About Company
-Bx, founded by Ur and Mur, is a prominent high-tech company specializing in health-focused smart products. 
-Leveraging Ur artistic background, Bx crafts beautifully designed technology aimed at informing and inspiring women worldwide. 
-Through data collection on activity, sleep, stress, and reproductive health, Bx empowers women with insights into their health and habits. 
-Since its establishment in 2XXX, Bx has experienced rapid growth, establishing itself as a tech-driven wellness leader for women.
+Company, founded by Ur and Mur, is a prominent high-tech company specializing in health-focused smart products. 
+Leveraging Ur artistic background, Company crafts beautifully designed technology aimed at informing and inspiring women worldwide. 
+Through data collection on activity, sleep, stress, and reproductive health, Company empowers women with insights into their health and habits. 
+Since its establishment in 2XXX, Company has experienced rapid growth, establishing itself as a tech-driven wellness leader for women.
 
-By 2XXX, Bx expanded globally, launching various products and making them available through numerous online retailers and its own e-commerce platform. 
+By 2XXX, Company expanded globally, launching various products and making them available through numerous online retailers and its own e-commerce platform. 
 The company employs a diverse marketing strategy, investing in traditional media like radio, billboards, print, and television, while focusing extensively on digital marketing channels. 
-Bx maintains an active presence on platforms like Google Search, Facebook, Instagram, and Twitter, complemented by video ads on YouTube and display ads on the Network.
+Company maintains an active presence on platforms like Google Search, Facebook, Instagram, and Twitter, complemented by video ads on YouTube and display ads on the Network.
 
 Produce a report with the deliverables:
 1. A clear statement of the business task : Ask
