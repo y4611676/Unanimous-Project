@@ -139,8 +139,7 @@ A : Use R in Visual Studio to record and archive the results of each program and
 在Visual Studio中使用R語言，將每個程式結果紀錄並存檔，並在該專案完成時，進行完整斷網封存，以便未來使用。
 
 
-Analyze process : 
-分析階段： 
+Analyze process(分析階段) : 
 
 Q : Summary analysis (分析摘要)
 
