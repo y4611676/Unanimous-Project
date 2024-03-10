@@ -79,9 +79,7 @@ A :
 
 詢問階段：
 
-問：
-
-確定業務任務
+問：確定業務任務
 
 答：
 
@@ -106,13 +104,9 @@ Fit into the guideline of ROCCC:
 
 準備階段：
 
-問: 
+問: 所有資料來源的說明
 
-所有資料來源的說明
-
-答:
-
-用於分析的主要數據來源是 FitBit 健身追蹤器數據，根據 CC0：公共領域授權提供，可透過 Mobius 存取。此資料集包含 30 位同意提交資料的 Fitbit 使用者的個人健身追蹤器資訊。
+答:用於分析的主要數據來源是 FitBit 健身追蹤器數據，根據 CC0：公共領域授權提供，可透過 Mobius 存取。此資料集包含 30 位同意提交資料的 Fitbit 使用者的個人健身追蹤器資訊。
 
 符合 ROCCC 的指導方針：
 
@@ -130,20 +124,12 @@ A : Use R in Visual Studio to record and archive the results of each program and
 
 處理階段：
 
-問: 
+問: 任何資料清理或處理的記錄
 
-任何資料清理或處理的記錄
-
-答:
-
-在Visual Studio中使用R語言，將每個程式結果紀錄並存檔，並在該專案完成時，進行完整斷網封存，以便未來使用。
+答:在Visual Studio中使用R語言，將每個程式結果紀錄並存檔，並在該專案完成時，進行完整斷網封存，以便未來使用。
 
 
-Analyze process(分析階段) : 
-
-Q : Summary analysis (分析摘要)
-
-A : 
+Analyze process(分析階段) : Summary analysis (分析摘要)
 
 Correlation between the number of steps and the calories burned by the users. We can see on the graph below a positive correlation: 
 the more active the user is, the more significant the number of burned calories is.
