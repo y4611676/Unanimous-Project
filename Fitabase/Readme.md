@@ -221,9 +221,7 @@ Act process : My top three recommendations based on analysis
 5.Use data-driven insights to continuously optimize marketing initiatives.
 
 
-行動階段：
-
-五大建議
+行動階段：建議
 
 1. 在活動高峰時段設定提醒，以便在未達到卡路里目標時讓使用者進行體能訓練。
 2. 記錄平均起床時間，建議最佳就寢時間，以便更好地休息。
