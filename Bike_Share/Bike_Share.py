@@ -151,32 +151,3 @@ plt.xlabel("Day of Week")
 plt.ylabel("Average Ride Length")
 plt.savefig('Average Ride Length Member vs Casual on Day of Week.png', dpi=300)
 plt.show()
-
-
-#Average Ride Length in Each Month
-data_cleaned_3=round(data_cleaned_3.groupby(['member_casual','month', 'month_name'], as_index=False)['ride_length'].agg('mean'),2).dropna()
-px.bar(data_cleaned_3, x = 'month_name', y = 'ride_length',
-        color = 'member_casual',
-        barmode='group',
-        text = 'ride_length', 
-        labels = {'ride_length': 'Average Ride Length (minutes)', 'member_casual': 'Member/Casual', 'month_name': 'Months (January 2021 - December 2021)'},
-        hover_name = 'member_casual', hover_data = {'member_casual': False, 'ride_length': True}, 
-        color_discrete_map = {'casual': '#058ED9', 'member': '#FF934F'})
-
-# Let's visualize most preferred bike by users
-data_cleaned_5 = data_cleaned.groupby(['rideable_type', 'member_casual'], as_index=False).count()
-px.bar(data_cleaned_5, x = 'rideable_type', y = 'ride_id',
-        color = 'member_casual',
-        barmode='group',
-        text = 'ride_id', 
-        labels = {'ride_id': 'No. of Rides', 'member_casual': 'Member/Casual', 'rideable_type' : 'Rideable Type'},
-        hover_name = 'member_casual', hover_data = {'member_casual': False, 'ride_length': False}, 
-        color_discrete_map = {'casual': '#058ED9', 'member': '#FF934F'})
-
-# Keep the data grouping and aggregation as it is
-data_cleaned_5 = data_cleaned.groupby(['member_casual', 'month', 'month_name'], as_index=False)['ride_id'].agg('count')
-px.line(data_cleaned_5, x='month_name', y='ride_id', range_y=[0, 450000],
-       color='member_casual', line_shape='spline', markers=True,
-       labels={'ride_id': 'No. of Rides', 'month': 'Months (January 2021 - December 2021)', 'member_casual': 'Member/Casual'},
-       hover_name='member_casual', hover_data={'member_casual': False, 'month': True, 'ride_id': True},
-       color_discrete_map={'casual': '#058ED9', 'member': '#FF934F'})
