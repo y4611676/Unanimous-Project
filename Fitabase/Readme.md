@@ -41,7 +41,7 @@ Products:
 - Bx會員：基於訂閱的計劃，為用戶提供個人化的營養、活動、睡眠、健康與美容以及心態方面的指導，根據用戶的生活方式和目標量身定制。
 
 
-About Company
+About Company: 
 Bx, founded by Ur and Mur, is a prominent high-tech company specializing in health-focused smart products. Leveraging Ur artistic background, Bx crafts beautifully designed technology aimed at informing and inspiring women worldwide. Through data collection on activity, sleep, stress, and reproductive health, Bx empowers women with insights into their health and habits. Since its establishment in 2XXX, Bx has experienced rapid growth, establishing itself as a tech-driven wellness leader for women.
 
 By 2XXX, Bx expanded globally, launching various products and making them available through numerous online retailers and its own e-commerce platform. The company employs a diverse marketing strategy, investing in traditional media like radio, billboards, print, and television, while focusing extensively on digital marketing channels. Bx maintains an active presence on platforms like Google Search, Facebook, Instagram, and Twitter, complemented by video ads on YouTube and display ads on the Network.
