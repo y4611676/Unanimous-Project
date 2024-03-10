@@ -120,34 +120,34 @@ Q : Summary analysis(分析摘要)
 
 A : 
 
-1. The average trip duration for the casual rider is less than that of average trip durations of the members. 
-2. During summer months number of rides at its highest level for both casual and member riders.
+- The average trip duration for the casual rider is less than that of average trip durations of the members. 
+- During summer months number of rides at its highest level for both casual and member riders.
 
-1. 散客的平均騎乘時間比會員的平均騎乘時間少。
-2. 夏季，散客和會員的旅行次數都達到了最高水準。
+- 散客的平均騎乘時間比會員的平均騎乘時間少。
+- 夏季，散客和會員的旅行次數都達到了最高水準。
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/d788a6a2-3320-4864-baec-101124f12091)
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/4e00f206-7709-4e95-92b6-3195e36036c0)
 
 
-1. Most of the riders are member users.
-2. Classic bikes are the most popular kind.
-3. Only casual users use docked bikes, membership users prefer classic bikes, While the number of e-bikes used by members is almost double the number used by casual visitors.
+- Most of the riders are member users.
+- Classic bikes are the most popular kind.
+- Only casual users use docked bikes, membership users prefer classic bikes, While the number of e-bikes used by members is almost double the number used by casual visitors.
 
-1.大多數騎乘者都是會員。
-2. 最受歡迎的經典自行車。
-3. 只有散客使用無樁電動自行車，會員更喜歡經典自行車，而會員使用電動自行車數幾乎是散客使用數的兩倍。
+- 大多數騎乘者都是會員。
+- 最受歡迎的經典自行車。
+- 只有散客使用無樁電動自行車，會員更喜歡經典自行車，而會員使用電動自行車數幾乎是散客使用數的兩倍。
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/ee609919-cae6-49ad-9039-65a95c994bdd)
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/03935dda-91ce-44b0-96a1-8a3e05086dce)
 
-1. There is a seasonal trend in ridership by both casual and member riders. Can see that the rise in no of rides during summer (July to September) 
-2. Member ridership surpasses casual ridership
-3. In weekends casual riders' ride length is maximum when compared to Weekdays. Members' ride length tend to be almost same in all weekdays
-4. The average ride length by casual riders is less than half of the members in the same year (2023).
+- There is a seasonal trend in ridership by both casual and member riders. Can see that the rise in no of rides during summer (July to September) 
+- Member ridership surpasses casual ridership
+- In weekends casual riders' ride length is maximum when compared to Weekdays. Members' ride length tend to be almost same in all weekdays
+- The average ride length by casual riders is less than half of the members in the same year (2023).
 
-1. 散客和會員乘車次數呈趨勢趨勢。可以看出，夏季（7月至9月）的乘車次數有所增加
-2. 會員數一直都大於散客數。
-3. 與平日相比，週末散客的乘車時長較長。而會員在所有工作日的乘車時長幾乎相同。
-4. 同年（2023年），會員平均乘車時間是散客的兩倍以上。
+- 散客和會員乘車次數呈趨勢趨勢。可以看出，夏季（7月至9月）的乘車次數有所增加
+- 會員數一直都大於散客數。
+- 與平日相比，週末散客的乘車時長較長。而會員在所有工作日的乘車時長幾乎相同。
+- 同年（2023年），會員平均乘車時間是散客的兩倍以上。
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/6e8ecd04-6f64-4c95-9cc1-7086867d2c50)
 ![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/b39ba1b5-4734-4805-88ca-3a3367158413)
 
