@@ -114,11 +114,7 @@ A : Using python in Jupyter notebook helps notify and adjusting in short period 
 
 答: 在Jupyter Notebook中使用python有助於在短時間內通知和調整，透過在短時間內運行數行程式碼，並在運行後給出結果，節省了大量時間，因此我可以時不時地查看數據，並且可以記錄我採取的每一個步驟。
 
-Analyze process(分析階段): 
-
-Q : Summary analysis(分析摘要)
-
-A : 
+Analyze process(分析階段): Summary analysis(分析摘要)
 
 - The average trip duration for the casual rider is less than that of average trip durations of the members. 
 - During summer months number of rides at its highest level for both casual and member riders.
