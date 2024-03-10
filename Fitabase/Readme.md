@@ -1,7 +1,9 @@
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/8cdf2cc1-85ae-4aae-8c44-f18d82b83048)Topic : How can a wellness technology company play it smart
+Topic : How can a wellness technology company play it smart
+
 標題：健康科技公司如何智能化
 
 Introduction: follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act. 
+
 導言：遵循資料分析流程的步驟：詢問、準備、處理、分析、分享和行動。
 
 Scenario: 
