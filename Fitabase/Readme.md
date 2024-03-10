@@ -67,7 +67,7 @@ A : Use R in Visual Studio to record and archive the results of each program and
 
 Analyze process : 
 
-Q : A summary of my analysis 
+Q : Summary analysis 
 
 A : 
 
