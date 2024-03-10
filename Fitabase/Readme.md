@@ -22,14 +22,9 @@ Products:
 
 
 About Company
-Company, founded by Ur and Mur, is a prominent high-tech company specializing in health-focused smart products. 
-Leveraging Ur artistic background, Company crafts beautifully designed technology aimed at informing and inspiring women worldwide. 
-Through data collection on activity, sleep, stress, and reproductive health, Company empowers women with insights into their health and habits. 
-Since its establishment in 2XXX, Company has experienced rapid growth, establishing itself as a tech-driven wellness leader for women.
+Bx, founded by Ur and Mur, is a prominent high-tech company specializing in health-focused smart products. Leveraging Ur artistic background, Bx crafts beautifully designed technology aimed at informing and inspiring women worldwide. Through data collection on activity, sleep, stress, and reproductive health, Bx empowers women with insights into their health and habits. Since its establishment in 2XXX, Bx has experienced rapid growth, establishing itself as a tech-driven wellness leader for women.
 
-By 2XXX, Company expanded globally, launching various products and making them available through numerous online retailers and its own e-commerce platform. 
-The company employs a diverse marketing strategy, investing in traditional media like radio, billboards, print, and television, while focusing extensively on digital marketing channels. 
-Company maintains an active presence on platforms like Google Search, Facebook, Instagram, and Twitter, complemented by video ads on YouTube and display ads on the Network.
+By 2XXX, Bx expanded globally, launching various products and making them available through numerous online retailers and its own e-commerce platform. The company employs a diverse marketing strategy, investing in traditional media like radio, billboards, print, and television, while focusing extensively on digital marketing channels. Bx maintains an active presence on platforms like Google Search, Facebook, Instagram, and Twitter, complemented by video ads on YouTube and display ads on the Network.
 
 Produce a report with the deliverables:
 1. A clear statement of the business task : Ask
@@ -55,26 +50,20 @@ Prepare process :
 Q: A description of all data sources used 
 
 A : 
-The primary data source utilized for analysis is the FitBit Fitness Tracker Data, which is available under the CC0: Public Domain license and made accessible through Mobius. 
-This dataset encompasses personal fitness tracker information from thirty Fitbit users who provided consent for the submission of their data. 
-Fit into the guideline of ROCCC
+The primary data source utilized for analysis is the FitBit Fitness Tracker Data, which is available under the CC0: Public Domain license and made accessible through Mobius. This dataset encompasses personal fitness tracker information from thirty Fitbit users who provided consent for the submission of their data. 
 
-
+Fit into the guideline of ROCCC: 
+1. Reliability: LOW — dataset was collected from 30 individuals whose gender is unknown.
+2. Originality: LOW — third-party data collected using Amazon Mechanical Turk.
+3. Comprehensive: MEDIUM — dataset contains multiple fields on daily activity intensity, calories used, daily steps taken, daily sleep time, and weight record.
+4. Current: MEDIUM — data is few years old but the habit of how people live does not change over a few years
+5. Cited: HIGH — data collector and the source is well documented
 
 Process process : 
 
 Q : Documentation of any cleaning or manipulation of data 
 
-A : Using python in Jupyter notebook helps notify and adjusting in short period of time, by running code in a line with short time, and gives out result after running saving lots of time, therefore I can check the data every now and then, and it can document every steps I take.
-
-ROCCC analysis
-Reliability: LOW — dataset was collected from 30 individuals whose gender is unknown.
-Originality: LOW — third-party data collected using Amazon Mechanical Turk.
-Comprehensive: MEDIUM — dataset contains multiple fields on daily activity intensity, calories used, daily steps taken, daily sleep time, and weight record.
-Current: MEDIUM — data is few years old but the habit of how people live does not change over a few years
-Cited: HIGH — data collector and the source is well documented
-
-
+A : Use R in Visual Studio to record and archive the results of each program and perform a complete disconnect and seal at the completion of the project for future use.
 
 Analyze process : 
 
@@ -122,11 +111,11 @@ A :
 
 Act process : My top three recommendations based on analysis
 
-Set reminders during peak activity hours to engage users in physical exercise if calorie goals are unmet.
-Record average wake-up times to recommend optimal bedtimes for better rest.
-Create varied activity programs to suit different schedules and preferences.
-Gamify usage to incentivize goal achievement and promote engagement.
-Use data-driven insights to continuously optimize marketing initiatives.
+1.Set reminders during peak activity hours to engage users in physical exercise if calorie goals are unmet.
+2.Record average wake-up times to recommend optimal bedtimes for better rest.
+3.Create varied activity programs to suit different schedules and preferences.
+4.Gamify usage to incentivize goal achievement and promote engagement.
+5.Use data-driven insights to continuously optimize marketing initiatives.
 
 
 
