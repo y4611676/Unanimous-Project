@@ -123,6 +123,8 @@ Analyze process(分析階段): Summary analysis(分析摘要)
 - 夏季，散客和會員的旅行次數都達到了最高水準。
 ![Average Ride Length Member vs Casual in 2023](https://github.com/y4611676/Unanimous-Project/assets/71640831/37781537-3986-41c1-ac0b-a8a9b6e4d295)
 ![Average Ride Length Member vs Casual on Month of Year](https://github.com/y4611676/Unanimous-Project/assets/71640831/6586edcf-f4ac-4d19-ad28-91883cd14cc6)
+![2023年會員與臨時使用者的平均騎行時長](https://github.com/y4611676/Unanimous-Project/assets/71640831/abeb19bf-3400-4134-af01-b366290224bc)
+![會員類別與月份的平均騎行時長](https://github.com/y4611676/Unanimous-Project/assets/71640831/22bce1a5-4911-4bc1-a9ed-9aadeaf966de)
 
 
 
@@ -135,6 +137,8 @@ Analyze process(分析階段): Summary analysis(分析摘要)
 - 只有散客使用無樁電動自行車，會員更喜歡經典自行車，而會員使用電動自行車數幾乎是散客使用數的兩倍。
 ![Percentage of Total Users](https://github.com/y4611676/Unanimous-Project/assets/71640831/28ec9153-8b3c-4722-a365-bc4d6ac31ad2)
 ![Rideable types compare to riders](https://github.com/y4611676/Unanimous-Project/assets/71640831/376a918b-bf82-47e7-95e5-7eeffb742619)
+![佔總用戶的百分比](https://github.com/y4611676/Unanimous-Project/assets/71640831/7f9f61cb-6470-41ad-86b2-95bf7b8d61ae)
+![會員類別與騎乘類型的騎乘次數](https://github.com/y4611676/Unanimous-Project/assets/71640831/89b34de3-0d78-4424-acf7-f2092503d91b)
 
 
 - There is a seasonal trend in ridership by both casual and member riders. Can see that the rise in no of rides during summer (July to September) 
@@ -148,7 +152,8 @@ Analyze process(分析階段): Summary analysis(分析摘要)
 - 同年（2023年），會員平均乘車時間是散客的兩倍以上。
 ![Average Ride Length Member vs Casual on Day of Week](https://github.com/y4611676/Unanimous-Project/assets/71640831/53f704ce-b588-4baf-bdec-722ed4f5b359)
 ![Monthly Ridership](https://github.com/y4611676/Unanimous-Project/assets/71640831/e2abff2f-ea5c-40b4-861a-3e78f4c755a3)
-
+![騎行日與會員類型的平均騎行時長](https://github.com/y4611676/Unanimous-Project/assets/71640831/b189aaf5-ef30-4be3-b275-b5f4d2c84634)
+![每月各會員類別的騎乘次數](https://github.com/y4611676/Unanimous-Project/assets/71640831/f60944c9-19f1-4451-be3d-40fed43590e0)
 
 
 Share process : 
