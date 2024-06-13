@@ -1,4 +1,4 @@
-### How Does a Bike-Share Navigate Speedy Success?
+![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/097fe08b-cb9d-43a7-8815-b3cb22334836)### How Does a Bike-Share Navigate Speedy Success?
 
 #### Data Source: 
 [divvy_tripdata](https://divvy-tripdata.s3.amazonaws.com/index.html)
@@ -6,17 +6,9 @@
 ---
 
 ### Scenario
-- **Role**: Data analyst in the marketing analytics team at Company, a bike-share company in City.
-- **Goal**: Increase the number of annual memberships to maximize profitability.
-- **Objective**: Understand usage patterns of casual riders vs. annual members to design a marketing strategy that converts casual riders into annual members.
-
----
-
-### About Company
-- **Service**: Bike-sharing across City with over 10,000 bikes at 1,000 stations.
-- **Pricing**: Flexible options including single-ride, day passes, and annual memberships.
-- **Challenge**: Increase annual memberships for higher profitability.
-- **Strategy**: Convert existing casual riders into members.
+- **About the Company**: Offers a bike-sharing service across the city, featuring over ten thousand bikes at a thousand stations. We provide flexible pricing options, including single-ride day passes and annual memberships.
+-  **Problem Statement**: Goal is to increase the number of annual members, as they are more profitable.
+-  **Proposed Solution**: Strategy is to convert existing casual riders into annual members. Casual riders are already familiar with our service, making them prime targets for membership.
 
 ---
 
