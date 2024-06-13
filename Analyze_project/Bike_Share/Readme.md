@@ -121,8 +121,9 @@ Analyze process(分析階段): Summary analysis(分析摘要)
 
 - 散客的平均騎乘時間比會員的平均騎乘時間少。
 - 夏季，散客和會員的旅行次數都達到了最高水準。
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/d788a6a2-3320-4864-baec-101124f12091)
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/4e00f206-7709-4e95-92b6-3195e36036c0)
+![Average Ride Length Member vs Casual in 2023](https://github.com/y4611676/Unanimous-Project/assets/71640831/37781537-3986-41c1-ac0b-a8a9b6e4d295)
+![Average Ride Length Member vs Casual on Month of Year](https://github.com/y4611676/Unanimous-Project/assets/71640831/6586edcf-f4ac-4d19-ad28-91883cd14cc6)
+
 
 
 - Most of the riders are member users.
@@ -132,8 +133,9 @@ Analyze process(分析階段): Summary analysis(分析摘要)
 - 大多數騎乘者都是會員。
 - 最受歡迎的經典自行車。
 - 只有散客使用無樁電動自行車，會員更喜歡經典自行車，而會員使用電動自行車數幾乎是散客使用數的兩倍。
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/ee609919-cae6-49ad-9039-65a95c994bdd)
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/03935dda-91ce-44b0-96a1-8a3e05086dce)
+![Percentage of Total Users](https://github.com/y4611676/Unanimous-Project/assets/71640831/28ec9153-8b3c-4722-a365-bc4d6ac31ad2)
+![Rideable types compare to riders](https://github.com/y4611676/Unanimous-Project/assets/71640831/376a918b-bf82-47e7-95e5-7eeffb742619)
+
 
 - There is a seasonal trend in ridership by both casual and member riders. Can see that the rise in no of rides during summer (July to September) 
 - Member ridership surpasses casual ridership
@@ -144,8 +146,9 @@ Analyze process(分析階段): Summary analysis(分析摘要)
 - 會員數一直都大於散客數。
 - 與平日相比，週末散客的乘車時長較長。而會員在所有工作日的乘車時長幾乎相同。
 - 同年（2023年），會員平均乘車時間是散客的兩倍以上。
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/6e8ecd04-6f64-4c95-9cc1-7086867d2c50)
-![image](https://github.com/y4611676/Unanimous-Project/assets/71640831/b39ba1b5-4734-4805-88ca-3a3367158413)
+![Average Ride Length Member vs Casual on Day of Week](https://github.com/y4611676/Unanimous-Project/assets/71640831/53f704ce-b588-4baf-bdec-722ed4f5b359)
+![riders in each month](https://github.com/y4611676/Unanimous-Project/assets/71640831/88d4a36d-5ab3-4c3e-81ee-2d3158f0f29c)
+
 
 Share process : 
 
