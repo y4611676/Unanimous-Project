@@ -2,6 +2,8 @@ Topic: How Does a Bike-Share Navigate Speedy Success?
 
 標題：共享單車如何成功?
 
+Data Source(資料來源): divvy_tripdata (https://divvy-tripdata.s3.amazonaws.com/index.html)
+
 Introduction: follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act. 
 
 導言：遵循資料分析流程的步驟：詢問、準備、處理、分析、分享和行動。
