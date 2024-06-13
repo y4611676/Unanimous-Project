@@ -6,8 +6,7 @@
 ---
 
 ### Introduction
-遵循資料分析流程的步驟：詢問、準備、處理、分析、分享和行動。
-
+Follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act.
 ---
 
 ### Scenario
