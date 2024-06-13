@@ -147,7 +147,8 @@ Analyze process(分析階段): Summary analysis(分析摘要)
 - 與平日相比，週末散客的乘車時長較長。而會員在所有工作日的乘車時長幾乎相同。
 - 同年（2023年），會員平均乘車時間是散客的兩倍以上。
 ![Average Ride Length Member vs Casual on Day of Week](https://github.com/y4611676/Unanimous-Project/assets/71640831/53f704ce-b588-4baf-bdec-722ed4f5b359)
-![riders in each month](https://github.com/y4611676/Unanimous-Project/assets/71640831/88d4a36d-5ab3-4c3e-81ee-2d3158f0f29c)
+![Monthly Ridership](https://github.com/y4611676/Unanimous-Project/assets/71640831/e2abff2f-ea5c-40b4-861a-3e78f4c755a3)
+
 
 
 Share process : 
