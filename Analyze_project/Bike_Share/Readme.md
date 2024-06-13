@@ -1,4 +1,4 @@
-![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/097fe08b-cb9d-43a7-8815-b3cb22334836)### How Does a Bike-Share Navigate Speedy Success?
+### How Does a Bike-Share Navigate Speedy Success?
 
 #### Data Source: 
 [divvy_tripdata](https://divvy-tripdata.s3.amazonaws.com/index.html)
