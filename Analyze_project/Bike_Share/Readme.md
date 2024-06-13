@@ -5,10 +5,6 @@
 
 ---
 
-### Introduction
-Follow the steps of the data analysis process: ask, prepare, process, analyze, share, and act.
----
-
 ### Scenario
 - **Role**: Data analyst in the marketing analytics team at Company, a bike-share company in City.
 - **Goal**: Increase the number of annual memberships to maximize profitability.
