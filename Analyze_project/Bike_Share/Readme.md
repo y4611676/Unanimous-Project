@@ -6,9 +6,17 @@
 ---
 
 ### Scenario
-- **About the Company**: Offers a bike-sharing service across the city, featuring over ten thousand bikes at a thousand stations. We provide flexible pricing options, including single-ride day passes and annual memberships.
--  **Problem Statement**: Goal is to increase the number of annual members, as they are more profitable.
--  **Proposed Solution**: Strategy is to convert existing casual riders into annual members. Casual riders are already familiar with our service, making them prime targets for membership.
+- **Role**: Data analyst in the marketing analytics team at Company, a bike-share company in City.
+- **Goal**: Increase the number of annual memberships to maximize profitability.
+- **Objective**: Understand usage patterns of casual riders vs. annual members to design a marketing strategy that converts casual riders into annual members.
+
+---
+
+### About Company
+- **Service**: Bike-sharing across City with over 10,000 bikes at 1,000 stations.
+- **Pricing**: Flexible options including single-ride, day passes, and annual memberships.
+- **Challenge**: Increase annual memberships for higher profitability.
+- **Strategy**: Convert existing casual riders into members.
 
 ---
 
