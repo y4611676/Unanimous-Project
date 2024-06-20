@@ -81,27 +81,32 @@ Data Analysis:
 - Significant variation in the number of malware attacks over the 12-month period
 - Identified peak months with higher attack volumes (months 2, 4, 6)
 - Tracked "IOC Detected" vs. "No Detection" cases to evaluate security control effectiveness
- 
+  ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/f9dfee58-9402-4cf4-81da-7b5f980d6da9)
+
 2.	Top Sources of Malicious Traffic:
 - Balanced traffic distribution across DNS (33.4%), HTTP (33.4%), and FTP (33.2%) protocols
 - Provides a baseline for monitoring changes and anomalies in the future
 - Informs capacity planning and resource allocation decisions
- 
+ ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/5a28d066-29e3-4d53-93e3-4557d00f949b)
+
 3.	Types of Detected Threats:
 - Evenly distributed attack types: DDoS (33.6%), Malware (33.3%), Intrusion (33.2%)
 - Comprehensive security strategy required to address all three attack types effectively
 - Guides incident response, mitigation, and threat intelligence efforts
- 
+![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/4948afa5-0b80-4250-8c61-09ed2ba1569e)
+
 4: User Authentication Attempts
 - Highest attack volume on TCP protocol, followed by UDP and ICMP
 - Insights into attack vectors and protocol-specific vulnerabilities
 - Supports incident response and mitigation planning, as well as threat research
- 
+ ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/cdaff0d3-e578-4929-bdde-97805b2349d5)
+
 5. Vulnerability Status by System and Severity:
 - Wide range of packet lengths observed for different attack types (Malware, Intrusion, DDoS)
 - Distinct packet length distributions can be used for anomaly detection and signature-based protection
 - Correlation with other security metrics can provide a more comprehensive view of the threat landscape
- 
+ ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/ef4947de-6462-4070-8476-791934b2fbed)
+
 ---
 
 **Share**
