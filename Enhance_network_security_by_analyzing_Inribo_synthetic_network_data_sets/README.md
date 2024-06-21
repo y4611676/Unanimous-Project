@@ -1,4 +1,4 @@
-![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/83ebbab7-acd4-4ccc-98cc-0702cdbd854e)標題幻燈片
+標題
 
 "通過分析Incribo 合成網路數據集增強網路安全"
 
@@ -48,23 +48,23 @@ Incribo提供定制的合成數據生成,專門針對網路安全需求。
 分析
 1. 隨時間變化的網路流量:
 惡意軟體攻擊在 12 個月內出現明顯波動，2 月、4 月和 6 月是攻擊高峰期。這強調了在此期間需要提高警惕。
- ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/cbf2042b-b3bb-4a54-b96f-c04cd4683420)
+![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/cbf2042b-b3bb-4a54-b96f-c04cd4683420)
 
-2. 惡意流量的主要源頭:
+3. 惡意流量的主要源頭:
 DNS（33.4%）、HTTP（33.4%）和 FTP（33.2%）協議的流量分佈相對均勻。組織應監控所有這些協定的流量以檢測異常。
- ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/f9c81abc-927c-49b0-b909-279f1b482abc)
+![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/f9c81abc-927c-49b0-b909-279f1b482abc)
 
-3. 檢測到的威脅類型:
+4. 檢測到的威脅類型:
 DDoS（33.6%）、惡意軟體（33.3%）和入侵（33.2%）成為最普遍的威脅類型。這需要一個全面的安全性原則，涵蓋所有三個威脅類別。
- ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/6ed121f5-5524-4c3c-8e4f-e3fd2cc7ec6b)
+![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/6ed121f5-5524-4c3c-8e4f-e3fd2cc7ec6b)
 
-4. 用戶認證嘗試:
+5. 用戶認證嘗試:
 TCP 協議的驗證嘗試數量最多，其次是 UDP 和 ICMP。監控這些協議的驗證嘗試可以揭示可疑活動。
- ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/90686820-72f6-4edd-adbe-9aa28e0ec1e8)
+![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/90686820-72f6-4edd-adbe-9aa28e0ec1e8)
 
-5. 按系統和嚴重性劃分的漏洞狀況:
+6. 按系統和嚴重性劃分的漏洞狀況:
 不同攻擊類型（惡意軟體、入侵、DDoS）的資料包長度差異很大。這種差異可用於異常檢測和基於簽名的保護。
- ![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/8ebf39ed-b21d-4482-86bd-356601bb27a1)
+![圖片](https://github.com/y4611676/Unanimous-Project/assets/71640831/8ebf39ed-b21d-4482-86bd-356601bb27a1)
 
 
 
