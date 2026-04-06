@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.env
+.venv/
+env/
+venv/
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Data files (large / downloaded at runtime)
+divvy_data/
+data_clean.csv
+*.zip
+
+# OS
+.DS_Store
+__MACOSX/
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
