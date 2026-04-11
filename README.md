@@ -1,7 +1,24 @@
-# Unanimous-Project(統一項目)
-Projects about my learning, but the data has been changed to different ones
+# Unanimous-Project
 
-關於我的學習和工作的項目，但數據已更改為不同的數據，以適應數據隱私
+Data analysis portfolio — 3 projects across business analytics, health tech, and machine learning.
+
+資料分析作品集，涵蓋商業分析、健康科技與機器學習三個領域。
+
+## Projects / 專案
+
+| Project | Domain | Stack | Key Skills |
+|---------|--------|-------|------------|
+| [Bike Share](./Bike_Share/) | Business Analytics | Python, DuckDB, Matplotlib, Seaborn | SQL, EDA, Data Viz |
+| [Fitabase](./Fitabase/) | Health Tech | R, tidyverse, ggplot2 | EDA, Data Cleaning |
+| [Personality Dataset](./kaggle/personality_dataset/) | Machine Learning | Python, scikit-learn | Classification, Random Forest |
+
+## Setup / 環境設定
+
+```bash
+pip install -r requirements.txt
+```
+
+---
 
 # 學習歷程
 開始程式學習的旅程，以數據安全為核心。掌握Python基礎語法和數據處理技巧，特別關注在使用Pandas和Numpy進行數據分析時如何保護數據的完整性和機密性。學習SQL時，不僅熟悉查詢語法、資料庫設計和管理，還專注於數據庫的安全性管理，確保數據存取的安全。
