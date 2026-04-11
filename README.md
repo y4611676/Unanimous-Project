@@ -10,6 +10,10 @@ Data analysis portfolio — focused on business insights and visualization, turn
 | [Bike Share](./Bike_Share/) | Business Analytics | Python, DuckDB, Matplotlib | SQL, EDA, Data Viz |
 | [Fitabase](./Fitabase/) | Health Tech | R, tidyverse, ggplot2 | EDA, Data Cleaning |
 
+## Tech Stack
+
+Python · R · SQL · Pandas · Seaborn · DuckDB · tidyverse · ggplot2 · Jupyter
+
 ## Analysis Approach
 
 - Translate raw data into conclusions that stakeholders can act on
