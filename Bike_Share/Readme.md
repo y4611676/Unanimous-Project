@@ -1,6 +1,6 @@
 ### How Does a Bike-Share Navigate Speedy Success?
 
-#### Data Source: 
+#### Data Source:
 [divvy_tripdata](https://divvy-tripdata.s3.amazonaws.com/index.html)
 
 ---
@@ -42,20 +42,21 @@
 
 ---
 
-### Process Process
+### Process
 **Data Cleaning Documentation**:
-- Used Python in Jupyter Notebook for efficient data cleaning and manipulation.
+- Used Python and DuckDB in Jupyter Notebook for data cleaning, manipulation, and SQL-based analysis.
 - Documented each step to ensure reproducibility and transparency.
 
 ---
 
 ### Analyze Process
 **Summary Analysis**:
-- **Average Trip Duration**: Casual riders have shorter average trip durations than members.
+- **Average Trip Duration**: Casual riders have longer average trip durations than members.
 - **Seasonal Trends**: Both casual and member rides peak during summer months.
 - **User Distribution**: Majority are member users; classic bikes are most popular.
 - **Bike Preferences**: Casual riders prefer docked bikes, members prefer classic bikes, and members use e-bikes twice as much as casual riders.
 - **Weekly Trends**: Casual riders have longer rides on weekends; members' ride lengths are consistent throughout the week.
+- **Peak Hours**: Both groups are most active between 5–7 PM and around 12 PM.
 
 ![Average Ride Length Member vs Casual in 2023](https://github.com/y4611676/Unanimous-Project/assets/71640831/37781537-3986-41c1-ac0b-a8a9b6e4d295)
 ![Average Ride Length Member vs Casual on Month of Year](https://github.com/y4611676/Unanimous-Project/assets/71640831/6586edcf-f4ac-4d19-ad28-91883cd14cc6)
