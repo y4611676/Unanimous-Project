@@ -1,0 +1,184 @@
+# =============================================================================
+# Example: reproduces the "商業分析報表" ETL from ../../../work/ using the
+# generic template — same CSVs, same outputs, but everything is declarative.
+#
+# Drop this file's parent directory next to the raw CSVs and run:
+#     python ../../run_pipeline.py config.yaml --src /path/to/raw_csvs
+#
+# This demonstrates that the template can fully cover the hand-written pipeline
+# in work/step1_clean.py … step4_anonymize.py without any code changes.
+# =============================================================================
+
+paths:
+  raw_dir: .
+  out_dir: ./output
+
+sources:
+  - name: sale
+    file: sale.csv
+    date_cols: [sdate]
+    numeric_cols: [tot, ttot, price, apcost, smoney, tprice]
+    key_col: salno
+    checks:
+      - {type: non_negative, col: tot}
+
+  - name: sales1
+    file: sales1.csv
+    numeric_cols: [prqty, price, pcost, indexs, rept2index]
+    derived:
+      - {name: rev, formula: "price * prqty"}
+      - {name: cost, formula: "pcost * prqty"}
+      - {name: gross, formula: "rev - cost"}
+    checks:
+      - {type: non_zero, col: price}
+
+  - name: purc
+    file: purc.csv
+    date_cols: [pdate]
+    numeric_cols: [tot, ttot, price, smoney, Tprice]
+    key_col: purno
+
+  - name: purcs1
+    file: purcs1.csv
+    numeric_cols: [prqty, price, indexs, rept4index]
+    derived:
+      - {name: purc_amt, formula: "price * prqty"}
+
+  - name: cust
+    file: cust.csv
+    key_col: cusno
+
+  - name: fact
+    file: fact.csv
+    key_col: facno
+
+  - name: prod
+    file: prod.csv
+    numeric_cols: [price, price3, price4, qty, pcost, safeqty]
+    key_col: prdno
+
+  - name: stockqty
+    file: stockqty.csv
+    numeric_cols: [qty]
+
+aggregations:
+  # ── 月度匯總 ────────────────────────────────────────────────────────
+  - name: monthly
+    source: sale
+    derive_period: {from: sdate}
+    groupby: [ym]
+    metrics:
+      銷售單數: {col: salno, func: count}
+      銷售額:   {col: tot,   func: sum}
+    sort_by: ym
+    ascending: true
+
+  # ── 客戶匯總 ────────────────────────────────────────────────────────
+  - name: cust_agg
+    source: sale
+    groupby: [cusno]
+    metrics:
+      訂單數:   {col: salno, func: count}
+      銷售額:   {col: tot,   func: sum}
+      最早交易: {col: sdate, func: min}
+      最近交易: {col: sdate, func: max}
+    joins:
+      - {source: cust, on: cusno, cols: [cusnm]}
+    share_of: 銷售額
+    sort_by: 銷售額
+
+  # ── 產品匯總（含毛利） ─────────────────────────────────────────────
+  - name: prod_agg
+    source: sales1
+    groupby: [prdno]
+    metrics:
+      銷售數量: {col: prqty, func: sum}
+      銷售額:   {col: rev,   func: sum}
+      成本:     {col: cost,  func: sum}
+      毛利:     {col: gross, func: sum}
+      交易次數: {col: salno, func: count}
+    joins:
+      - {source: prod, on: prdno, cols: [prdnm, classno, safeqty]}
+    derived:
+      - {name: 毛利率, formula: "毛利 / 銷售額"}
+    sort_by: 銷售額
+
+  # ── 供應商匯總 ─────────────────────────────────────────────────────
+  - name: fact_agg
+    source: purc
+    groupby: [facno]
+    metrics:
+      採購單數: {col: purno, func: count}
+      採購額:   {col: tot,   func: sum}
+      最早採購: {col: pdate, func: min}
+      最近採購: {col: pdate, func: max}
+    joins:
+      - {source: fact, on: facno, cols: [facnm]}
+    sort_by: 採購額
+
+analysis:
+  rfm:
+    enabled: true
+    source: sale
+    customer_col: cusno
+    date_col: sdate
+    amount_col: tot
+    output: rfm
+
+  pareto:
+    - source: cust_agg
+      dimension: cusno
+      metric: 銷售額
+      output: pareto_customers
+    - source: prod_agg
+      dimension: prdno
+      metric: 銷售額
+      output: pareto_products
+
+  top_n:
+    - {source: cust_agg, by: 銷售額, n: 20, output: top20_customers}
+    - {source: prod_agg, by: 銷售額, n: 20, output: top20_products}
+
+output:
+  excel:
+    enabled: true
+    filename: 商業分析報表.xlsx
+    source: aggregated
+    sheets:
+      - {from: monthly,  title: 月度營收, number_cols: [銷售額]}
+      - {from: cust_agg, title: 客戶排行, number_cols: [銷售額],
+         percent_cols: [share, cum_share]}
+      - {from: prod_agg, title: 產品排行, number_cols: [銷售額, 毛利],
+         percent_cols: [毛利率]}
+      - {from: fact_agg, title: 供應商排行, number_cols: [採購額]}
+      - {from: rfm, stage: analyzed, title: 客戶 RFM}
+      - {from: pareto_customers, stage: analyzed, title: 客戶 80/20,
+         number_cols: [銷售額], percent_cols: [share, cum_share]}
+      - {from: pareto_products,  stage: analyzed, title: 產品 80/20,
+         number_cols: [銷售額], percent_cols: [share, cum_share]}
+
+anonymization:
+  seed: 20240101
+  money_scale: {mode: random}
+  date_shift_months: random
+  id_mappings:
+    - {col: cusno, prefix: CUST, label_col: cusnm, label: 客戶}
+    - {col: prdno, prefix: PROD, label_col: prdnm, label: 品項}
+    - {col: facno, prefix: SUPP, label_col: facnm, label: 廠商}
+  rules:
+    monthly:
+      money_cols: [銷售額]
+    cust_agg:
+      money_cols: [銷售額]
+      date_cols: [最早交易, 最近交易]
+    prod_agg:
+      money_cols: [銷售額, 成本, 毛利]
+    fact_agg:
+      money_cols: [採購額]
+      date_cols: [最早採購, 最近採購]
+    sale:
+      date_cols: [sdate]
+      money_cols: [tot, price]
+    purc:
+      date_cols: [pdate]
+      money_cols: [tot, price]

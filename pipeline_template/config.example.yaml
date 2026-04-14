@@ -1,0 +1,113 @@
+# =============================================================================
+# Generic ETL pipeline config — minimal example
+#
+# Drop this file next to your own CSVs, edit the field names, and run:
+#     python run_pipeline.py config.yaml
+#
+# Every section is optional — delete what you don't need.
+# =============================================================================
+
+paths:
+  raw_dir: ./data/raw        # where your source CSVs live
+  out_dir: ./data/out        # pipeline writes cleaned/, aggregated/, analyzed/,
+                             # anonymized/ subfolders here
+
+# ---------------------------------------------------------------------------
+# 1. CLEAN — describe each source CSV you want cleaned.
+# ---------------------------------------------------------------------------
+sources:
+  - name: orders              # logical name used by later stages
+    file: orders.csv
+    date_cols: [order_date]
+    numeric_cols: [amount, quantity]
+    key_col: order_id         # drop duplicates on this column
+    derived:
+      - {name: line_total, formula: "amount * quantity"}
+    checks:
+      - {type: non_negative, col: amount}
+      - {type: not_null, col: customer_id}
+
+  - name: customers
+    file: customers.csv
+    key_col: customer_id
+
+# ---------------------------------------------------------------------------
+# 2. AGGREGATE — declarative groupby operations.
+# ---------------------------------------------------------------------------
+aggregations:
+  - name: monthly
+    source: orders
+    derive_period: {from: order_date}    # adds year/month/ym/yq columns
+    groupby: [ym]
+    metrics:
+      revenue: {col: line_total, func: sum}
+      order_count: {col: order_id, func: nunique}
+
+  - name: customer_agg
+    source: orders
+    groupby: [customer_id]
+    metrics:
+      revenue: {col: line_total, func: sum}
+      order_count: {col: order_id, func: count}
+    joins:
+      - {source: customers, on: customer_id, cols: [customer_name]}
+    share_of: revenue
+    sort_by: revenue
+
+# ---------------------------------------------------------------------------
+# 3. ANALYZE — reusable analyses.
+# ---------------------------------------------------------------------------
+analysis:
+  rfm:
+    enabled: true
+    source: orders
+    customer_col: customer_id
+    date_col: order_date
+    amount_col: line_total
+    output: rfm
+
+  pareto:
+    - source: customer_agg
+      dimension: customer_id
+      metric: revenue
+      output: pareto_customers
+
+  top_n:
+    - source: customer_agg
+      by: revenue
+      n: 20
+      output: top20_customers
+
+# ---------------------------------------------------------------------------
+# 3b. OPTIONAL — formatted Excel report written after the stages complete.
+# ---------------------------------------------------------------------------
+output:
+  excel:
+    enabled: true
+    filename: report.xlsx
+    source: aggregated                # default stage to pull sheets from
+    sheets:
+      - {from: monthly,       title: 月度營收,   number_cols: [revenue]}
+      - {from: customer_agg,  title: 客戶排行,   number_cols: [revenue],
+         percent_cols: [share, cum_share]}
+      - {from: rfm, stage: analyzed, title: RFM 分數}
+
+# ---------------------------------------------------------------------------
+# 4. ANONYMIZE — optional; omit this section to skip the stage entirely.
+# ---------------------------------------------------------------------------
+anonymization:
+  seed: 20240101
+  money_scale: {mode: random}       # or {mode: fixed, fixed: 0.37}
+  date_shift_months: random         # or an explicit int, e.g. -42
+
+  id_mappings:
+    - {col: customer_id, prefix: CUST, label_col: customer_name, label: 客戶}
+
+  rules:
+    monthly:
+      money_cols: [revenue]
+    customer_agg:
+      money_cols: [revenue]
+    orders:
+      date_cols: [order_date]
+      money_cols: [amount, line_total]

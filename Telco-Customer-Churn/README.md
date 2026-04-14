@@ -47,6 +47,14 @@ jupyter notebook notebooks/telco_churn_analysis.ipynb
 
 IBM Telco Customer Churn public dataset (available on Kaggle)
 
+## Reusable Pipeline
+
+The same dataset can also be processed by the generic ETL framework in
+[`../pipeline_template/`](../pipeline_template/) — see
+[`examples/telco_churn/config.yaml`](../pipeline_template/examples/telco_churn/config.yaml)
+for a YAML-only run that produces churn-rate breakdowns and a high-value
+customer Pareto report.
+
 ## License
 
 Code released under the [MIT License](LICENSE).
