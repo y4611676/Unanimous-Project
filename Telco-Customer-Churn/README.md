@@ -16,8 +16,6 @@ Using the **IBM Telco Customer Churn** public dataset to analyze customer churn 
 
 ```
 .
-├── data/raw/
-│   └── Telco-Customer-Churn.csv
 ├── src/telco_churn/
 │   ├── __init__.py
 │   └── cleaning.py
