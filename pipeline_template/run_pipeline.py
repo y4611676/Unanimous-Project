@@ -7,7 +7,8 @@ Usage::
     python run_pipeline.py path/to/config.yaml --src /data/raw --out /data/out
 
 Stages: clean → aggregate → analyze → anonymize. Each stage can be skipped
-by listing only the stages you want in ``--only``.
+by listing only the stages you want in ``--only``. If ``output.excel`` is
+configured, a formatted xlsx report is written after the stages complete.
 """
 
 from __future__ import annotations
@@ -34,6 +35,7 @@ from pipeline.cleaning import run_cleaning  # noqa: E402
 from pipeline.aggregation import run_aggregation  # noqa: E402
 from pipeline.analysis import run_analysis  # noqa: E402
 from pipeline.anonymization import anonymize_tables  # noqa: E402
+from pipeline.excel_writer import write_report  # noqa: E402
 from pipeline.io_utils import log  # noqa: E402
 
 
@@ -115,9 +117,21 @@ def main(argv: list[str] | None = None) -> int:
         analyzed = run_analysis(cfg, tables, str(analyzed_dir))
         tables.update(analyzed)
 
+    anonymized: dict = {}
     if "anonymize" in stages:
         log("\n[4/4] anonymizing", level="step")
-        anonymize_tables(cfg, tables, str(anonymized_dir))
+        anonymized = anonymize_tables(cfg, tables, str(anonymized_dir))
+
+    # Optional formatted Excel report — writes only when output.excel.enabled.
+    tables_by_stage = {
+        "cleaned": cleaned,
+        "aggregated": aggregated,
+        "analyzed": analyzed,
+        "anonymized": anonymized,
+    }
+    report_path = write_report(cfg, tables_by_stage, out_root)
+    if report_path:
+        log(f"excel report: {report_path}")
 
     log("\n" + "=" * 50)
     log(f"done. output at: {out_root}", level="ok")

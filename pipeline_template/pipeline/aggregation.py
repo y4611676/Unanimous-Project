@@ -78,13 +78,13 @@ def _run_single_aggregation(cfg: dict[str, Any],
     if period_cfg:
         df = _add_period_cols(df, period_cfg["from"])
 
-    df = _apply_joins(df, cfg.get("joins", []), tables)
-
     groupby = cfg.get("groupby", [])
     metrics = cfg.get("metrics", {})
 
+    # Joins are applied AFTER the groupby so descriptive look-ups (cusnm, prdnm)
+    # survive aggregation (matches the pattern in work/step2_aggregate.py:110-111).
     if not groupby or not metrics:
-        return df
+        return _apply_joins(df, cfg.get("joins", []), tables)
 
     agg_args = {}
     for out_col, spec in metrics.items():
@@ -102,6 +102,10 @@ def _run_single_aggregation(cfg: dict[str, Any],
         return pd.DataFrame()
 
     result = df.groupby(groupby, dropna=False).agg(**agg_args).reset_index()
+
+    # Joins happen on the aggregated result so descriptive look-ups don't get
+    # dropped by the groupby.
+    result = _apply_joins(result, cfg.get("joins", []), tables)
 
     # Optional post-processing: share and cumulative share of a metric.
     share_of = cfg.get("share_of")

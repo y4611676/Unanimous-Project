@@ -5,6 +5,7 @@ from .cleaning import clean_source, run_cleaning
 from .aggregation import run_aggregation
 from .analysis import run_analysis
 from .anonymization import anonymize_tables
+from .excel_writer import write_report
 
 __all__ = [
     "load_csv",
@@ -15,4 +16,5 @@ __all__ = [
     "run_aggregation",
     "run_analysis",
     "anonymize_tables",
+    "write_report",
 ]

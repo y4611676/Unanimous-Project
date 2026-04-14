@@ -74,30 +74,46 @@ def _build_id_maps(tables: dict[str, pd.DataFrame],
         label = m.get("label")
         label_col = m.get("label_col")
 
+        # First pass: collect all unique ID values across every table that has
+        # the ID column (ordering is deterministic after the sort below).
         seen: list[str] = []
-        name_pairs: dict[str, str] = {}
         for tbl in tables.values():
             if tbl is None or tbl.empty or col not in tbl.columns:
                 continue
             for v in tbl[col].dropna().astype(str).str.strip().unique():
                 if v and v.lower() != "nan" and v not in seen:
                     seen.append(v)
-                    if label_col and label_col in tbl.columns:
-                        sub = tbl.loc[tbl[col].astype(str).str.strip() == v, label_col].dropna()
-                        if len(sub):
-                            nm = str(sub.iloc[0]).strip()
-                            if nm and nm.lower() != "nan":
-                                name_pairs.setdefault(nm, v)
+
+        # Second pass: walk every table that has BOTH the ID column and the
+        # label column, so a paired-name table can contribute even if another
+        # table already introduced the IDs.
+        name_pairs: dict[str, str] = {}
+        if label and label_col:
+            for tbl in tables.values():
+                if tbl is None or tbl.empty:
+                    continue
+                if col not in tbl.columns or label_col not in tbl.columns:
+                    continue
+                pairs = (
+                    tbl[[col, label_col]]
+                    .dropna()
+                    .astype(str)
+                    .apply(lambda s: s.str.strip())
+                )
+                for _, row in pairs.iterrows():
+                    cid, nm = row[col], row[label_col]
+                    if cid and nm and nm.lower() != "nan":
+                        name_pairs.setdefault(nm, cid)
 
         seen.sort()
         id_maps[col] = {v: f"{prefix}-{str(i + 1).zfill(3)}" for i, v in enumerate(seen)}
 
-        if label and label_col:
-            # Name map follows the same ordering as the ID map so they agree.
+        if label and label_col and name_pairs:
             nm_map: dict[str, str] = {}
             for nm, orig_id in name_pairs.items():
-                idx = seen.index(orig_id)
-                nm_map[nm] = f"{label}{_idx_to_letters(idx)}"
+                if orig_id in seen:
+                    idx = seen.index(orig_id)
+                    nm_map[nm] = f"{label}{_idx_to_letters(idx)}"
             name_maps[label_col] = nm_map
 
     return {"ids": id_maps, "names": name_maps}

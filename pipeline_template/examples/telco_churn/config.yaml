@@ -1,0 +1,135 @@
+# =============================================================================
+# Example: running the generic template against the IBM Telco Customer Churn
+# public dataset (Kaggle: "Telco-Customer-Churn.csv").
+#
+# This example proves the template is not tied to the sales/purchase domain —
+# the same engine can drive churn analysis by changing only this YAML file.
+#
+# Place the CSV next to this file (or point --src at it) and run:
+#     python ../../run_pipeline.py config.yaml
+#
+# Covers the analysis themes from Telco-Customer-Churn/README.md:
+#   - Churn rate by segment (Contract, PaymentMethod, InternetService, tenure)
+#   - Monthly revenue loss (MonthlyCharges × Churn)
+#   - High-value customer ranking (TotalCharges pareto)
+#   - New-customer danger zone (tenure bucket churn rates)
+# =============================================================================
+
+paths:
+  raw_dir: .
+  out_dir: ./output
+
+sources:
+  - name: telco
+    file: Telco-Customer-Churn.csv
+    numeric_cols: [tenure, MonthlyCharges, TotalCharges, SeniorCitizen]
+    key_col: customerID
+    # Flag-columns used by aggregations below — computed in-place as 0/1 ints.
+    derived:
+      - {name: is_churn,       formula: "Churn == 'Yes'"}
+      - {name: churn_revenue,  formula: "MonthlyCharges * is_churn"}
+    checks:
+      - {type: not_null, col: customerID}
+      - {type: non_negative, col: tenure}
+      - {type: non_negative, col: MonthlyCharges}
+
+aggregations:
+  # ── Churn rate by contract type ────────────────────────────────────────
+  - name: churn_by_contract
+    source: telco
+    groupby: [Contract]
+    metrics:
+      customers:           {col: customerID,     func: nunique}
+      churned:             {col: is_churn,       func: sum}
+      monthly_revenue:     {col: MonthlyCharges, func: sum}
+      churn_revenue_loss:  {col: churn_revenue,  func: sum}
+    derived:
+      - {name: churn_rate, formula: "churned / customers"}
+    sort_by: churn_rate
+
+  # ── Churn rate by payment method ───────────────────────────────────────
+  - name: churn_by_payment
+    source: telco
+    groupby: [PaymentMethod]
+    metrics:
+      customers:          {col: customerID,     func: nunique}
+      churned:            {col: is_churn,       func: sum}
+      churn_revenue_loss: {col: churn_revenue,  func: sum}
+    derived:
+      - {name: churn_rate, formula: "churned / customers"}
+    sort_by: churn_rate
+
+  # ── Churn rate by internet service type ────────────────────────────────
+  - name: churn_by_internet
+    source: telco
+    groupby: [InternetService]
+    metrics:
+      customers:          {col: customerID,     func: nunique}
+      churned:            {col: is_churn,       func: sum}
+      churn_revenue_loss: {col: churn_revenue,  func: sum}
+    derived:
+      - {name: churn_rate, formula: "churned / customers"}
+    sort_by: churn_rate
+
+  # ── Customer-level summary used for high-value ranking ─────────────────
+  - name: customer_agg
+    source: telco
+    groupby: [customerID]
+    metrics:
+      total_charges:    {col: TotalCharges,   func: sum}
+      monthly_charges:  {col: MonthlyCharges, func: sum}
+      tenure_months:    {col: tenure,         func: max}
+      churned:          {col: is_churn,       func: max}
+    share_of: total_charges
+    sort_by: total_charges
+
+analysis:
+  pareto:
+    # "High-value customer" 80/20 based on lifetime revenue
+    - source: customer_agg
+      dimension: customerID
+      metric: total_charges
+      output: high_value_customers
+
+  top_n:
+    # Most expensive churn cases (immediate revenue loss focus)
+    - source: customer_agg
+      by: monthly_charges
+      n: 50
+      output: top50_at_risk_spenders
+
+anonymization:
+  seed: 20240101
+  money_scale: {mode: random}
+  date_shift_months: 0                    # Telco dataset has no real dates
+  id_mappings:
+    - {col: customerID, prefix: CUST, label: Customer}
+  rules:
+    telco:
+      money_cols: [MonthlyCharges, TotalCharges, churn_revenue]
+    customer_agg:
+      money_cols: [total_charges, monthly_charges]
+    churn_by_contract:
+      money_cols: [monthly_revenue, churn_revenue_loss]
+    churn_by_payment:
+      money_cols: [churn_revenue_loss]
+    churn_by_internet:
+      money_cols: [churn_revenue_loss]
+
+output:
+  excel:
+    enabled: true
+    filename: telco_churn_report.xlsx
+    source: aggregated
+    sheets:
+      - {from: churn_by_contract, title: Contract 流失率,
+         number_cols: [monthly_revenue, churn_revenue_loss],
+         percent_cols: [churn_rate]}
+      - {from: churn_by_payment, title: Payment 流失率,
+         number_cols: [churn_revenue_loss], percent_cols: [churn_rate]}
+      - {from: churn_by_internet, title: Internet 流失率,
+         number_cols: [churn_revenue_loss], percent_cols: [churn_rate]}
+      - {from: high_value_customers, stage: analyzed, title: 高價值客戶 80/20,
+         number_cols: [total_charges], percent_cols: [share, cum_share]}
+      - {from: top50_at_risk_spenders, stage: analyzed, title: Top50 月費客戶,
+         number_cols: [total_charges, monthly_charges]}

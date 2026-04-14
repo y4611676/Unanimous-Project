@@ -57,18 +57,28 @@ python run_pipeline.py my_config.yaml --only analyze   # 從 cleaned/ 讀取
 
 ---
 
-## 實際案例：`examples/sales_report/`
+## 實際案例
 
-這是用**同一套模板**重新實作 `work/` 原本的商業分析報表，證明模板能完整覆蓋那個情境。檔案說明：
+這個 repo 附了兩個實際情境的 config，**兩個都用同一套引擎**，只靠 YAML 不同就能跑出不同領域的報表：
 
-- [`examples/sales_report/config.yaml`](./examples/sales_report/config.yaml) — 用 YAML 描述原本 `step1`~`step4` 裡寫死的全部 9 個 CSV、30+ 欄位、毛利計算、RFM、Pareto、去識別化規則
-
-把原本的 CSV 放到同一個資料夾，執行：
+### `examples/sales_report/` — 商業分析報表
+用 YAML 描述原本 `work/step1`~`step4` 裡寫死的全部 9 個 CSV、30+ 欄位、毛利計算、RFM、Pareto、去識別化規則，外加 Excel 輸出（7 張工作表）。
 
 ```bash
 cd examples/sales_report
 python ../../run_pipeline.py config.yaml --src /path/to/raw_csvs
 ```
+
+### `examples/telco_churn/` — 電信客戶流失分析
+用同一套引擎跑 IBM Telco Customer Churn 資料集，產生流失率分段（Contract / Payment / Internet）、高價值客戶 80/20、風險客戶 Top 50 的完整 Excel 報表。
+
+```bash
+cd examples/telco_churn
+# 把 Telco-Customer-Churn.csv 放在同資料夾後
+python ../../run_pipeline.py config.yaml
+```
+
+這兩個 schema 完全不同（銷售 vs 電信），但跑的是同一條 pipeline 程式碼——這就是「通用化」的證明。
 
 ---
 
@@ -102,8 +112,36 @@ pipeline_template/
 
 ---
 
+## Excel 輸出
+
+Config 裡加一段 `output.excel` 就會產出格式化的 xlsx 報表（表頭配色、邊框、凍結列、欄寬自動調整、金額/百分比格式化）：
+
+```yaml
+output:
+  excel:
+    enabled: true
+    filename: report.xlsx
+    source: aggregated
+    sheets:
+      - {from: monthly, title: 月度營收, number_cols: [revenue]}
+      - {from: rfm, stage: analyzed, title: RFM 分數}
+      - {from: customer_agg, title: 客戶排行, percent_cols: [share, cum_share]}
+```
+
+每張工作表的 `from` 指向某個階段產出的表名；`stage` 預設用 `source`，也可以逐表覆蓋（例如分析結果在 `analyzed/`）。
+
+## 測試
+
+```bash
+cd pipeline_template
+pip install pytest
+pytest tests/ -v
+```
+
+附了 5 支測試檔共約 20 個 case，涵蓋：清洗、聚合（含 YAML `on:` → `True` 的 quirk）、RFM/Pareto/Top-N、去識別化的確定性與跨表一致性、Excel 輸出。
+
 ## 延伸方向
 
-- 若需要 `work/step3` 那種完整 Excel 格式化（表頭色彩、邊框、凍結欄列、圖表），可在 `pipeline/` 下再加一個 `excel_writer.py`，讀 analyzed/aggregated 的 CSV 再輸出 `.xlsx`。暫不包含於目前版本
-- 其他情境的 config 可加到 `examples/`（如 `examples/telco_churn/`, `examples/bike_share/`），把整個 repo 變成「多情境模板庫」
+- 其他情境的 config 可加到 `examples/`（如 `examples/bike_share/`），把整個 repo 變成「多情境模板庫」
+- Excel 輸出若要加圖表（`BarChart` / `LineChart`），`openpyxl.chart` 已經可用，在 `excel_writer.py` 的 `_write_sheet` 後綴加幾行即可
 - 若資料量大到 pandas 吃不動，`io_utils.load_csv` 可改用 `duckdb`（requirements.txt 已含）並維持同樣介面

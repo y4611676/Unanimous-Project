@@ -139,6 +139,24 @@ analysis:
     - {source: cust_agg, by: 銷售額, n: 20, output: top20_customers}
     - {source: prod_agg, by: 銷售額, n: 20, output: top20_products}
 
+output:
+  excel:
+    enabled: true
+    filename: 商業分析報表.xlsx
+    source: aggregated
+    sheets:
+      - {from: monthly,  title: 月度營收, number_cols: [銷售額]}
+      - {from: cust_agg, title: 客戶排行, number_cols: [銷售額],
+         percent_cols: [share, cum_share]}
+      - {from: prod_agg, title: 產品排行, number_cols: [銷售額, 毛利],
+         percent_cols: [毛利率]}
+      - {from: fact_agg, title: 供應商排行, number_cols: [採購額]}
+      - {from: rfm, stage: analyzed, title: 客戶 RFM}
+      - {from: pareto_customers, stage: analyzed, title: 客戶 80/20,
+         number_cols: [銷售額], percent_cols: [share, cum_share]}
+      - {from: pareto_products,  stage: analyzed, title: 產品 80/20,
+         number_cols: [銷售額], percent_cols: [share, cum_share]}
+
 anonymization:
   seed: 20240101
   money_scale: {mode: random}
