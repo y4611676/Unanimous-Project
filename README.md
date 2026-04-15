@@ -12,12 +12,13 @@
 
 ### 📊 Case Studies
 
-| Project | Domain | Stack | Highlights |
+| Project | Domain | Stack | Key Finding |
 |---|---|---|---|
-| [Telco Customer Churn](./Telco-Customer-Churn/) | 電信 | Python, Pandas, Seaborn | 流失率分群、營收流失估算、留客建議 |
-| [Bike Share](./Bike_Share/) | 共享經濟 | Python, DuckDB, Matplotlib | SQL、EDA、視覺化 |
-| [Fitabase](./Fitabase/) | 健康科技 | R, tidyverse, ggplot2 | 清理、EDA、行為分析 |
-| [商業分析報表](./work/) | 零售批發 | Python, Pandas, openpyxl | 銷售 / 採購 / 客戶 / 庫存 ETL + 去識別化 |
+| [Safe Haven Index](./Safe_Haven_Index/) | 地緣政治 / 國際 | Python, Streamlit, Plotly, World Bank API | **互動式儀表板**：六項指標加權排名 61 國，Top 5 = Australia/Canada/NZ/Norway/Ireland；權重可拉動即時換算 |
+| [Telco Customer Churn](./Telco-Customer-Churn/) | 電信 | Python, Pandas, Seaborn | **$139K/月營收流失**；月租客戶流失率 42.7%（高於年約 15 倍），電子支票用戶流失 45% |
+| [Bike Share](./Bike_Share/) | 共享經濟 | Python, DuckDB, Matplotlib | **Casual 騎乘時長是會員 2 倍**、僅 Casual 用 docked 車；夏季 5–7 PM 是轉會員黃金窗口 |
+| [Fitabase](./Fitabase/) | 健康科技 | R, tidyverse, ggplot2 | **81% 日常時間靜態久坐**、平均睡眠僅 6.9 hrs，5–7 PM 是推播黃金時段 |
+| [商業分析報表](./work/) | 零售批發 | Python, Pandas, openpyxl | **28% 客戶貢獻 65% 銷售**、20 項虧損品項拖累利潤、64% 商品零庫存 |
 
 ## Framework × Case Studies
 
@@ -27,7 +28,7 @@
 
 ## Tech Stack
 
-Python · R · SQL · Pandas · Seaborn · DuckDB · tidyverse · ggplot2 · Jupyter · openpyxl · pytest
+Python · R · SQL · Pandas · Seaborn · DuckDB · tidyverse · ggplot2 · Jupyter · openpyxl · pytest · Streamlit · Plotly · World Bank API
 
 ## Setup
 

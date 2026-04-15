@@ -1,7 +1,18 @@
 ### How Does a Bike-Share Navigate Speedy Success?
 
 #### Data Source:
-[divvy_tripdata](https://divvy-tripdata.s3.amazonaws.com/index.html)
+[divvy_tripdata](https://divvy-tripdata.s3.amazonaws.com/index.html) — 2023 full year, 10,000+ bikes across 1,000+ stations
+
+---
+
+### Key Findings
+
+- **Casual riders average 2× the ride duration** of members (28 min vs. 14 min on weekends) — their usage pattern is leisure, not commuting
+- **Only casual riders use docked bikes (18% of their rides)** — members never touch them; members use electric bikes twice as often
+- Both groups peak in **summer (Jun–Aug)** and between **5–7 PM** on weekdays — clear marketing windows
+- **Recommendation**: run weekend membership trials at park/tourist docking stations, launch May–June annual-plan promos before peak season, and highlight break-even after 8–10 rides to frequent casual users
+
+See [`Bike_Share_Analysis.pdf`](./Bike_Share_Analysis.pdf) for the full report.
 
 ---
 

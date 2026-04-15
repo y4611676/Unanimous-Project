@@ -1,6 +1,17 @@
 ### How Can a Wellness Technology Company Play It Smart?
 
-**Data Source**: [FitBit Fitness Tracker Data](https://www.kaggle.com/datasets/arashnic/fitbit) (CC0: Public Domain, via Mobius)
+**Data Source**: [FitBit Fitness Tracker Data](https://www.kaggle.com/datasets/arashnic/fitbit) (CC0: Public Domain, via Mobius) — 30 Fitbit users
+
+---
+
+### Key Findings
+
+- **81% of the average day is sedentary** — even among fitness tracker users — only 3% is fairly/very active
+- **Average sleep: 6.9 hrs** — below the recommended 7–9 hrs for adults, with a near-perfect correlation between time-in-bed and sleep logged
+- **Activity peaks at 5–7 PM and 12 PM**; Tuesday averages 8,125 steps vs. Sunday's 6,933 (the clear rest day)
+- **Recommendation**: schedule Bellabeat push-notifications during peak hours, build a sleep-improvement campaign linking Leaf/Time devices to bedtime reminders, and gamify hourly movement nudges to break sedentary patterns
+
+See [`Fitabase_Wellness_Analysis.pdf`](./Fitabase_Wellness_Analysis.pdf) for the full report.
 
 ---
 

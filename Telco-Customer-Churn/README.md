@@ -2,6 +2,16 @@
 
 Using the **IBM Telco Customer Churn** public dataset to analyze customer churn behavior from a business perspective and provide actionable retention recommendations.
 
+## Key Findings
+
+- **26.5% overall churn rate** — 1,869 customers lost, averaging **$139K/month** in recurring revenue
+- **Month-to-month contracts churn at 42.7%** — 15× higher than two-year contracts (3%)
+- **Electronic check users churn at 45%** — the highest of any payment method
+- Churned customers averaged **18-month tenure vs. 37 months** for retained — first 3 months are the danger zone
+- **Recommendation**: offer a 10–15% annual-plan discount to month-to-month customers + auto-pay credit to electronic-check users; trigger Day 7/30/90 outreach for new signups
+
+See [`Telco_Churn_Analysis.pdf`](./Telco_Churn_Analysis.pdf) for the full report.
+
 ## Analysis Focus
 
 | Topic | Description |
@@ -35,13 +45,6 @@ python -m venv .venv
 pip install -r requirements.txt
 jupyter notebook notebooks/telco_churn_analysis.ipynb
 ```
-
-## Key Findings
-
-- Month-to-month contract customers churn at **6x the rate** of two-year contract customers
-- Electronic check payment has the highest churn rate; automatic payment has the lowest
-- New customers are at highest risk in the **first 3 months**
-- Fiber optic customers churn at a higher rate than DSL — worth further investigation
 
 ## Data Source
 
