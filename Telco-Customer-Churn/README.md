@@ -1,28 +1,79 @@
-# Telco Customer Churn — Business Analysis
+# How Much Revenue Are You Losing to Customers Who Quietly Leave?
 
-Using the **IBM Telco Customer Churn** public dataset to analyze customer churn behavior from a business perspective and provide actionable retention recommendations.
+An analysis of a telecom company's customer base that found **26.5% churn costing $139,000 per month in recurring revenue** — and identified three specific, fixable causes.
 
-## Key Findings
+## This analysis is for you if:
 
-- **26.5% overall churn rate** — 1,869 customers lost, averaging **$139K/month** in recurring revenue
-- **Month-to-month contracts churn at 42.7%** — 15× higher than two-year contracts (3%)
-- **Electronic check users churn at 45%** — the highest of any payment method
-- Churned customers averaged **18-month tenure vs. 37 months** for retained — first 3 months are the danger zone
-- **Recommendation**: offer a 10–15% annual-plan discount to month-to-month customers + auto-pay credit to electronic-check users; trigger Day 7/30/90 outreach for new signups
+- You run a subscription business and you're losing customers faster than you're replacing them, but you don't know *which* customers or *why*
+- Your sales team focuses on new signups while the back door stays wide open
+- You've tried generic retention offers and they didn't move the needle
 
-See [`Telco_Churn_Analysis.pdf`](./Telco_Churn_Analysis.pdf) for the full report.
+---
 
-## Analysis Focus
+## What We Found (And What to Do About It)
 
-| Topic | Description |
-|-------|-------------|
-| Churn rate by segment | Contract type, payment method, internet service, tenure |
-| Monthly revenue loss | Translate churn into actual revenue impact |
-| High-value customer analysis | Identify the segments most worth investing in for retention |
-| New customer danger zone | Identify highest-risk tenure months to help customer service prioritize |
-| Business recommendations | Three immediately actionable directions |
+This was real data from 7,043 telecom customers. The patterns show up in almost every subscription business: internet, software, media, gyms, B2B services.
 
-## Project Structure
+### Finding 1: Contract type is the single biggest churn driver
+
+- **Month-to-month contracts: 42.7% churn**
+- Two-year contracts: 3% churn
+- That's a **15× difference** from one product decision
+
+**What to do:** Offer a 10–15% discount to move month-to-month customers onto annual plans. The math almost always works: a 15% discount beats losing the customer entirely. Most operators resist this because it "feels like giving money away" — but your churn rate is already giving money away, silently.
+
+### Finding 2: Electronic check users churn at 45%
+
+This payment method was churning nearly double the others. Why? Electronic check customers tend to be the most price-sensitive and the least locked-in — they never set up auto-pay, so every bill is a chance to leave.
+
+**What to do:** Offer a one-time credit ($5–$10) to anyone who switches to auto-pay. The retention lift pays it back within a quarter.
+
+### Finding 3: The first 3 months are the danger zone
+
+Churned customers had an average tenure of 18 months. Retained customers averaged 37. But drill in and the pattern is sharper: **most of the churn happens in the first 90 days.** If a customer survives the first quarter, they're likely to stay for years.
+
+**What to do:** Automated outreach on Day 7, Day 30, and Day 90. Not a sales pitch — a check-in. "How's it going? Anything we can help with?" This single workflow typically recovers 3–5% of at-risk new customers.
+
+---
+
+## What You Get
+
+A customer-by-customer risk score plus three specific, prioritized actions:
+
+| Output | Decision It Supports |
+|--------|---------------------|
+| Churn rate by segment (contract, payment, service, tenure) | Where to focus retention budget first |
+| Revenue impact per segment | Which problem is worth fixing vs. accepting |
+| High-value customer Pareto | Who to protect at all costs |
+| First-90-days risk profile | How to redesign onboarding |
+| Three ranked recommendations | What to ship next quarter |
+
+Full report: [`Telco_Churn_Analysis.pdf`](./Telco_Churn_Analysis.pdf)
+
+---
+
+## Want the Same Analysis on Your Data?
+
+If you run any kind of recurring-revenue business — telecom, SaaS, subscription box, gym, streaming, professional services — this analysis maps directly onto your data.
+
+**What we need from you:**
+- Your customer records, subscription history, and churn events (whatever format you've got)
+- A 30-minute call to understand your product and pricing model
+
+**What you get back:**
+- A ranked list of churn causes specific to *your* business (not a generic benchmark)
+- Revenue impact attached to each cause — so you can prioritize what to fix
+- Three concrete retention experiments to run, with expected lift estimates
+
+Reach out through the portfolio main page.
+
+---
+
+## For Technical Readers
+
+Standalone analysis project using the **IBM Telco Customer Churn** public dataset (7,043 customers, available on Kaggle).
+
+### Project Structure
 
 ```
 .
@@ -35,7 +86,7 @@ See [`Telco_Churn_Analysis.pdf`](./Telco_Churn_Analysis.pdf) for the full report
 └── README.md
 ```
 
-## Setup
+### Setup
 
 ```bash
 python -m venv .venv
@@ -46,11 +97,17 @@ pip install -r requirements.txt
 jupyter notebook notebooks/telco_churn_analysis.ipynb
 ```
 
-## Data Source
+### Analysis Focus
 
-IBM Telco Customer Churn public dataset (available on Kaggle)
+| Topic | Description |
+|-------|-------------|
+| Churn rate by segment | Contract type, payment method, internet service, tenure |
+| Monthly revenue loss | Translate churn into actual revenue impact |
+| High-value customer analysis | Identify the segments most worth investing in for retention |
+| New customer danger zone | Identify highest-risk tenure months to help customer service prioritize |
+| Business recommendations | Three immediately actionable directions |
 
-## Reusable Pipeline
+### Reusable Pipeline
 
 The same dataset can also be processed by the generic ETL framework in
 [`../pipeline_template/`](../pipeline_template/) — see
@@ -58,6 +115,6 @@ The same dataset can also be processed by the generic ETL framework in
 for a YAML-only run that produces churn-rate breakdowns and a high-value
 customer Pareto report.
 
-## License
+### License
 
 Code released under the [MIT License](LICENSE).
