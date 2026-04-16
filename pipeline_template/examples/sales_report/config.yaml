@@ -1,7 +1,6 @@
 # =============================================================================
-# Example: reproduces the "Business Analytics Report" ETL from ../../../work/
-# using the generic template — same CSVs, same outputs, but everything is
-# declarative.
+# Example: reproduces the "Business Analysis Report" ETL from ../../../work/
+# using the generic template — same CSVs, same outputs, but declarative.
 #
 # Drop this file's parent directory next to the raw CSVs and run:
 #     python ../../run_pipeline.py config.yaml --src /path/to/raw_csvs
@@ -63,59 +62,59 @@ sources:
     numeric_cols: [qty]
 
 aggregations:
-  # ── Monthly summary ───────────────────────────────────────────────────
+  # ── Monthly revenue summary ─────────────────────────────────────────
   - name: monthly
     source: sale
     derive_period: {from: sdate}
     groupby: [ym]
     metrics:
-      order_count: {col: salno, func: count}
+      sales_count: {col: salno, func: count}
       sales:       {col: tot,   func: sum}
     sort_by: ym
     ascending: true
 
-  # ── Customer summary ──────────────────────────────────────────────────
+  # ── Customer summary ─────────────���──────────────────────────────────
   - name: cust_agg
     source: sale
     groupby: [cusno]
     metrics:
-      order_count:    {col: salno, func: count}
-      sales:          {col: tot,   func: sum}
-      first_purchase: {col: sdate, func: min}
-      last_purchase:  {col: sdate, func: max}
+      order_count:       {col: salno, func: count}
+      sales:             {col: tot,   func: sum}
+      first_transaction: {col: sdate, func: min}
+      last_transaction:  {col: sdate, func: max}
     joins:
       - {source: cust, on: cusno, cols: [cusnm]}
     share_of: sales
     sort_by: sales
 
-  # ── Product summary (incl. gross margin) ──────────────────────────────
+  # ── Product summary (with gross profit) ─��───────────────────────────
   - name: prod_agg
     source: sales1
     groupby: [prdno]
     metrics:
-      units_sold:   {col: prqty, func: sum}
-      sales:        {col: rev,   func: sum}
-      cost:         {col: cost,  func: sum}
-      gross_profit: {col: gross, func: sum}
-      txn_count:    {col: salno, func: count}
+      sales_qty:         {col: prqty, func: sum}
+      sales:             {col: rev,   func: sum}
+      cost:              {col: cost,  func: sum}
+      gross_profit:      {col: gross, func: sum}
+      transaction_count: {col: salno, func: count}
     joins:
       - {source: prod, on: prdno, cols: [prdnm, classno, safeqty]}
     derived:
-      - {name: gross_margin, formula: "gross_profit / sales"}
+      - {name: gp_rate, formula: "gross_profit / sales"}
     sort_by: sales
 
-  # ── Supplier summary ──────────────────────────────────────────────────
+  # ── Supplier summary ───────��────────────────────────────────────────
   - name: fact_agg
     source: purc
     groupby: [facno]
     metrics:
-      po_count:     {col: purno, func: count}
-      purchase_amt: {col: tot,   func: sum}
-      first_po:     {col: pdate, func: min}
-      last_po:      {col: pdate, func: max}
+      purchase_count:    {col: purno, func: count}
+      purchases:         {col: tot,   func: sum}
+      first_purchase:    {col: pdate, func: min}
+      last_purchase:     {col: pdate, func: max}
     joins:
       - {source: fact, on: facno, cols: [facnm]}
-    sort_by: purchase_amt
+    sort_by: purchases
 
 analysis:
   rfm:
@@ -143,19 +142,19 @@ analysis:
 output:
   excel:
     enabled: true
-    filename: business_analytics_report.xlsx
+    filename: business_analysis_report.xlsx
     source: aggregated
     sheets:
       - {from: monthly,  title: Monthly Revenue, number_cols: [sales]}
       - {from: cust_agg, title: Customer Ranking, number_cols: [sales],
          percent_cols: [share, cum_share]}
       - {from: prod_agg, title: Product Ranking, number_cols: [sales, gross_profit],
-         percent_cols: [gross_margin]}
-      - {from: fact_agg, title: Supplier Ranking, number_cols: [purchase_amt]}
+         percent_cols: [gp_rate]}
+      - {from: fact_agg, title: Supplier Ranking, number_cols: [purchases]}
       - {from: rfm, stage: analyzed, title: Customer RFM}
-      - {from: pareto_customers, stage: analyzed, title: Customer 80-20,
+      - {from: pareto_customers, stage: analyzed, title: Customer 80/20,
          number_cols: [sales], percent_cols: [share, cum_share]}
-      - {from: pareto_products,  stage: analyzed, title: Product 80-20,
+      - {from: pareto_products,  stage: analyzed, title: Product 80/20,
          number_cols: [sales], percent_cols: [share, cum_share]}
 
 anonymization:
@@ -163,20 +162,20 @@ anonymization:
   money_scale: {mode: random}
   date_shift_months: random
   id_mappings:
-    - {col: cusno, prefix: CUST, label_col: cusnm, label: Cust}
-    - {col: prdno, prefix: PROD, label_col: prdnm, label: Prod}
-    - {col: facno, prefix: SUPP, label_col: facnm, label: Supp}
+    - {col: cusno, prefix: CUST, label_col: cusnm, label: "Customer "}
+    - {col: prdno, prefix: PROD, label_col: prdnm, label: "Product "}
+    - {col: facno, prefix: SUPP, label_col: facnm, label: "Supplier "}
   rules:
     monthly:
       money_cols: [sales]
     cust_agg:
       money_cols: [sales]
-      date_cols: [first_purchase, last_purchase]
+      date_cols: [first_transaction, last_transaction]
     prod_agg:
       money_cols: [sales, cost, gross_profit]
     fact_agg:
-      money_cols: [purchase_amt]
-      date_cols: [first_po, last_po]
+      money_cols: [purchases]
+      date_cols: [first_purchase, last_purchase]
     sale:
       date_cols: [sdate]
       money_cols: [tot, price]

@@ -1,9 +1,9 @@
 """
-Step 2: Data aggregation
-- Load the cleaned data from cleaned/
-- Merge master tables with detail tables
-- Build aggregation tables for analysis
-- Write output to the aggregated/ folder
+Step 2: Data Aggregation
+- Read cleaned/ data from step1
+- Join master and detail tables
+- Build aggregated analysis tables
+- Output to aggregated/ folder
 """
 
 import os, sys
@@ -21,15 +21,15 @@ def main():
     if len(sys.argv) > 1:
         folder = sys.argv[1]
     else:
-        folder = input("Enter the cleaned/ folder path (from step1):\n> ").strip()
+        folder = input("Enter path to cleaned folder (step1 output):\n> ").strip()
 
     src = Path(folder)
     out = src.parent / "aggregated"
     out.mkdir(exist_ok=True)
-    print(f"\n📂 source: {src}")
-    print(f"📁 output: {out}\n{'='*50}")
+    print(f"\nSource: {src}")
+    print(f"Output: {out}\n{'='*50}")
 
-    # Load base tables
+    # Read base data
     sale    = load(src, "sale.csv")
     sales1  = load(src, "sales1.csv")
     purc    = load(src, "purc.csv")
@@ -39,7 +39,9 @@ def main():
     prod    = load(src, "prod.csv")
     stockqty= load(src, "stockqty.csv")
 
-    # Derive date columns
+    # ── Derive time-period columns for grouping ────────
+    # ym = year-month ("2023-06") for monthly aggregation
+    # yq = year-quarter ("2023Q2") for quarterly roll-ups
     if not sale.empty and "sdate" in sale.columns:
         sale["sdate"] = pd.to_datetime(sale["sdate"], errors="coerce")
         sale["year"]  = sale["sdate"].dt.year
@@ -53,8 +55,9 @@ def main():
         purc["month"] = purc["pdate"].dt.month
         purc["ym"]    = purc["pdate"].dt.to_period("M").astype(str)
 
-    # ── 1. Sales master + detail merge ────────────────
-    print("\n[1/7] merging sales master + detail...")
+    # ── 1. Join sale master + detail ─────────────────
+    # Answers: what was sold, to whom, at what margin? (header + line items + names)
+    print("\n[1/7] Joining sale details...")
     if not sale.empty and not sales1.empty:
         sale_cols = ["salno","sdate","year","month","ym","yq","cusno","busno","stockno","tot","apcost"]
         sale_sub  = sale[[c for c in sale_cols if c in sale.columns]]
@@ -69,16 +72,20 @@ def main():
         print(f"   sale_full.csv: {len(sale_full)} rows")
     else:
         sale_full = pd.DataFrame()
-        print("   ⚠️  missing sale or sales1")
+        print("   Warning: missing sale or sales1")
 
-    # ── 2. Monthly revenue ─────────────────────────────
-    print("\n[2/7] monthly revenue aggregation...")
+    # ── 2. Monthly revenue aggregation ──────────────
+    # Answers: how is the business trending month-over-month? (revenue, cost, profit, cash flow)
+    print("\n[2/7] Monthly revenue aggregation...")
     if not sale.empty and "ym" in sale.columns:
         monthly_sale = sale.groupby("ym").agg(
-            order_count=("salno","count"),
+            sales_count=("salno","count"),
             sales=("tot","sum"),
         ).reset_index()
 
+        # sales_detail comes from line-item rev (qty*price), while sales comes from
+        # the header tot field — they can differ due to discounts/tax adjustments on the header.
+        # We need both: header totals for cash flow, line-item totals for margin analysis.
         if not sales1.empty and "rev" in sales1.columns and not sale_full.empty and "ym" in sale_full.columns:
             monthly_margin = sale_full.groupby("ym").agg(
                 sales_detail=("rev","sum"),
@@ -86,88 +93,98 @@ def main():
                 gross_profit=("gross","sum"),
             ).reset_index()
             monthly_sale = monthly_sale.merge(monthly_margin, on="ym", how="left")
-            monthly_sale["gross_margin"] = monthly_sale["gross_profit"] / monthly_sale["sales_detail"].replace(0, np.nan)
+            monthly_sale["gp_rate"] = monthly_sale["gross_profit"] / monthly_sale["sales_detail"].replace(0, np.nan)
 
         if not purc.empty and "ym" in purc.columns:
             monthly_purc = purc.groupby("ym").agg(purchases=("tot","sum")).reset_index()
             monthly_sale = monthly_sale.merge(monthly_purc, on="ym", how="outer").sort_values("ym")
-            monthly_sale["net"] = monthly_sale["sales"].fillna(0) - monthly_sale["purchases"].fillna(0)
+            monthly_sale["balance"] = monthly_sale["sales"].fillna(0) - monthly_sale["purchases"].fillna(0)
 
         monthly_sale.to_csv(out / "monthly.csv", index=False, encoding="utf-8-sig")
-        print(f"   monthly.csv: {len(monthly_sale)} month(s)")
+        print(f"   monthly.csv: {len(monthly_sale)} months")
 
-    # ── 3. Customer aggregation ────────────────────────
-    print("\n[3/7] customer aggregation...")
+    # ── 3. Customer aggregation ─────────────────────
+    # Answers: who are the most valuable customers? (lifetime value, frequency, tenure)
+    print("\n[3/7] Customer aggregation...")
     if not sale.empty and "cusno" in sale.columns:
         cust_agg = sale.groupby("cusno").agg(
-            orders=("salno","count"),
+            order_count=("salno","count"),
             sales=("tot","sum"),
-            first_purchase=("sdate","min"),
-            last_purchase=("sdate","max"),
+            first_transaction=("sdate","min"),
+            last_transaction=("sdate","max"),
         ).reset_index()
-        cust_agg["tenure_months"] = ((cust_agg["last_purchase"] - cust_agg["first_purchase"]) / np.timedelta64(30,"D")).round(1)
-        cust_agg["avg_order_value"] = cust_agg["sales"] / cust_agg["orders"]
+        cust_agg["transaction_months"] = ((cust_agg["last_transaction"] - cust_agg["first_transaction"]) / np.timedelta64(30,"D")).round(1)
+        cust_agg["avg_order_value"] = cust_agg["sales"] / cust_agg["order_count"]
         if not cust.empty:
             cust_agg = cust_agg.merge(cust[["cusno","cusnm"]].drop_duplicates("cusno"), on="cusno", how="left")
+        # share + cumulative_share: Pareto-ready output so step3 can immediately
+        # identify which customers make up the top 80% of revenue
         total = cust_agg["sales"].sum()
         cust_agg["share"] = cust_agg["sales"] / total
-        cust_agg["cum_share"] = cust_agg.sort_values("sales", ascending=False)["share"].cumsum().values
+        cust_agg["cumulative_share"] = cust_agg.sort_values("sales", ascending=False)["share"].cumsum().values
         cust_agg = cust_agg.sort_values("sales", ascending=False)
         cust_agg.to_csv(out / "cust_agg.csv", index=False, encoding="utf-8-sig")
-        print(f"   cust_agg.csv: {len(cust_agg)} customer(s)")
+        print(f"   cust_agg.csv: {len(cust_agg)} customers")
 
-    # ── 4. Product aggregation ─────────────────────────
-    print("\n[4/7] product aggregation...")
+    # ── 4. Product aggregation ─────────────────────
+    # Answers: which products drive revenue and margin? (sales, cost, GP per SKU)
+    print("\n[4/7] Product aggregation...")
     if not sales1.empty and "prdno" in sales1.columns:
         prod_agg = sales1.groupby("prdno").agg(
-            units_sold=("prqty","sum"),
+            sales_qty=("prqty","sum"),
             sales=("rev","sum"),
             cost=("cost","sum"),
             gross_profit=("gross","sum"),
-            txn_count=("salno","count"),
+            transaction_count=("salno","count"),
         ).reset_index()
-        prod_agg["gross_margin"] = prod_agg["gross_profit"] / prod_agg["sales"].replace(0, np.nan)
+        prod_agg["gp_rate"] = prod_agg["gross_profit"] / prod_agg["sales"].replace(0, np.nan)
         if not prod.empty:
             prod_sub = prod[["prdno"] + [c for c in ["prdnm","classno","safeqty"] if c in prod.columns]].drop_duplicates("prdno")
             prod_agg = prod_agg.merge(prod_sub, on="prdno", how="left")
         prod_agg = prod_agg.sort_values("sales", ascending=False)
         prod_agg.to_csv(out / "prod_agg.csv", index=False, encoding="utf-8-sig")
-        print(f"   prod_agg.csv: {len(prod_agg)} product(s)")
+        print(f"   prod_agg.csv: {len(prod_agg)} products")
 
-    # ── 5. Supplier aggregation ────────────────────────
-    print("\n[5/7] supplier aggregation...")
+    # ── 5. Supplier aggregation ────────────────────
+    # Answers: which suppliers do we depend on most? (spend concentration, frequency)
+    print("\n[5/7] Supplier aggregation...")
     if not purc.empty and "facno" in purc.columns:
         fact_agg = purc.groupby("facno").agg(
-            po_count=("purno","count"),
-            purchase_amt=("tot","sum"),
-            first_po=("pdate","min"),
-            last_po=("pdate","max"),
+            purchase_count=("purno","count"),
+            purchases=("tot","sum"),
+            first_purchase=("pdate","min"),
+            last_purchase=("pdate","max"),
         ).reset_index()
-        fact_agg["avg_po_value"] = fact_agg["purchase_amt"] / fact_agg["po_count"]
+        fact_agg["avg_purchase_price"] = fact_agg["purchases"] / fact_agg["purchase_count"]
         if not fact.empty:
             fact_agg = fact_agg.merge(fact[["facno","facnm"]].drop_duplicates("facno"), on="facno", how="left")
-        fact_agg = fact_agg.sort_values("purchase_amt", ascending=False)
+        fact_agg = fact_agg.sort_values("purchases", ascending=False)
         fact_agg.to_csv(out / "fact_agg.csv", index=False, encoding="utf-8-sig")
-        print(f"   fact_agg.csv: {len(fact_agg)} supplier(s)")
+        print(f"   fact_agg.csv: {len(fact_agg)} suppliers")
 
-    # ── 6. Inventory aggregation ───────────────────────
-    print("\n[6/7] inventory aggregation...")
+    # ── 6. Inventory aggregation ────────────────────
+    # Answers: what needs restocking? (current qty vs threshold, stock value at risk)
+    print("\n[6/7] Inventory aggregation...")
     if not stockqty.empty:
         stock_agg = stockqty.copy()
         if not prod.empty:
             prod_sub = prod[["prdno"] + [c for c in ["prdnm","price","pcost","safeqty","lastin","lastout"] if c in prod.columns]].drop_duplicates("prdno")
             stock_agg = stock_agg.merge(prod_sub, on="prdno", how="left")
-        LOW = 1  # low-stock threshold — tune as needed
+        # Threshold logic: qty<=0 is out-of-stock (urgent), qty<=LOW is dangerously
+        # low and needs reorder, everything else is normal. LOW=1 is conservative;
+        # ideally this would use each product's safeqty instead.
+        LOW = 1  # Low stock threshold
         stock_agg["stock_status"] = stock_agg["qty"].apply(
-            lambda q: "❌ out_of_stock" if q <= 0 else ("⚠️ low_stock" if q <= LOW else "✅ ok"))
+            lambda q: "Zero Stock" if q <= 0 else ("Low Stock" if q <= LOW else "Normal"))
         if "price" in stock_agg.columns:
             stock_agg["stock_value"] = pd.to_numeric(stock_agg["qty"], errors="coerce") * pd.to_numeric(stock_agg["price"], errors="coerce")
         stock_agg = stock_agg.sort_values("qty")
         stock_agg.to_csv(out / "stock_agg.csv", index=False, encoding="utf-8-sig")
-        print(f"   stock_agg.csv: {len(stock_agg)} item(s)")
+        print(f"   stock_agg.csv: {len(stock_agg)} items")
 
-    # ── 7. AR / AP aggregation ─────────────────────────
-    print("\n[7/7] AR / AP aggregation...")
+    # ── 7. AR/AP aggregation ────────────────────────
+    # Answers: what is outstanding? (receivables = money owed to us, payables = money we owe)
+    print("\n[7/7] AR/AP aggregation...")
     for src_file, out_file, label in [
         ("rereces.csv", "ar_agg.csv", "AR"),
         ("repays.csv",  "ap_agg.csv", "AP"),
@@ -178,8 +195,8 @@ def main():
             print(f"   {out_file} ({label}): {len(df)} rows")
 
     print(f"\n{'='*50}")
-    print(f"✅ Aggregation complete. Data saved to: {out}")
-    print(f"   Next: python step3_analyze.py \"{out}\"")
+    print(f"Aggregation complete. Output saved to: {out}")
+    print(f"   Next step: python step3_analyze.py \"{out}\"")
     input("\nPress Enter to exit...")
 
 if __name__ == "__main__":

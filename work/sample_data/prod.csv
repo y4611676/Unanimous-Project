@@ -1,0 +1,3 @@
+prdno,prdnm,classno,price,price3,price4,qty,pcost,safeqty,lastin,lastout
+P001,Widget A,CL01,100,90,85,200,80,10,2024-01-10,2024-03-10
+P002,Widget B,CL01,200,180,170,5,150,10,2024-02-15,2024-03-10
