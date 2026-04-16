@@ -1,24 +1,24 @@
-# 商業分析報表 ETL（手寫版）
+# Business Analytics Report — Hand-Written ETL
 
-針對特定零售批發業者的商業分析報表，從原始 CSV 一路走到去識別化 Excel 報表。
+End-to-end pipeline for a specific retail/wholesale business, from raw CSVs to a de-identified Excel report.
 
 ## Key Findings
 
-（數字來自 [`商業分析報表_去識別化版.xlsx`](./Business%20Analytics%20Report_Deidentified%20Version.xlsx)；金額已縮放，但比例保留原始結構）
+(Numbers from [`Business Analytics Report_Deidentified Version.xlsx`](./Business%20Analytics%20Report_Deidentified%20Version.xlsx); absolute monetary amounts have been scaled for anonymisation, but the proportions and structural findings are preserved.)
 
-- **客戶極度集中**：197 位「高消費新客」（28% 客戶數）貢獻 **65.4% 銷售額**；另有 347 位「流失風險」客戶占 30% 銷售額急待挽回
-- **毛利兩極化**：1,677 項高毛利商品（>30%）撐起 **89.3% 銷售額**，但仍有 20 項虧損商品（毛利 <0%）正在拖累利潤
-- **庫存健康嚴重失衡**：3,224 項商品中 **64.1% 零庫存、13.3% 低於安全庫存**，僅 22.5% 正常——補貨節奏與預測明顯失準
-- **建議**：（1）流失風險名單交由業務 1:1 聯繫挽回；（2）20 項虧損商品立即停售或重新議價；（3）針對零庫存熱銷品建立自動補貨警示
+- **Extreme customer concentration**: 197 "high-value new customers" (28% of all customers) drive **65.4% of total sales**; another 347 "at-risk" customers account for 30% of sales and urgently need retention
+- **Bimodal margins**: 1,677 high-margin SKUs (>30% gross margin) deliver **89.3% of revenue**, but 20 loss-making SKUs (<0% margin) are still actively dragging profit down
+- **Severe inventory health imbalance**: of 3,224 SKUs, **64.1% are out of stock, 13.3% are below safety stock**, only 22.5% are at healthy levels — replenishment pacing and forecasting are clearly broken
+- **Recommendations**: (1) hand the at-risk customer list to sales for 1:1 outreach; (2) immediately discontinue or re-price the 20 loss-making SKUs; (3) set up auto-replenishment alerts for out-of-stock best-sellers
 
-## 流程
+## Pipeline
 
 ```
 step1_clean.py  →  step2_aggregate.py  →  step3_analyze.py  →  step4_anonymize.py
-   清理               聚合                    Excel 報表             去識別化
+   Clean             Aggregate             Excel report          De-identify
 ```
 
-每一步讀前一步的輸出，依序執行：
+Each stage reads the previous stage's output and runs sequentially:
 
 ```bash
 python step1_clean.py /path/to/raw_csvs
@@ -27,26 +27,30 @@ python step3_analyze.py /path/to/raw_csvs/aggregated
 python step4_anonymize.py /path/to/raw_csvs/aggregated
 ```
 
-## 涵蓋資料
+## Data covered
 
-9 個 CSV：`sale`、`sales1`、`purc`、`purcs1`、`cust`、`fact`、`prod`、`stockqty`、`rereces/repays`。
+Nine CSVs: `sale`, `sales1`, `purc`, `purcs1`, `cust`, `fact`, `prod`, `stockqty`, `rereces`/`repays`.
 
-## 產出
+## Outputs
 
-- `cleaned/` — 清理後的乾淨 CSV
-- `aggregated/` — 月度、客戶、產品、供應商、庫存、應收應付的聚合表
-- `商業分析報表_完整版.xlsx` — 完整格式化 Excel 報表
-- `商業分析報表_去識別化版.xlsx` — 客戶/品項/廠商遮罩、金額縮放、日期平移後的版本
+- `cleaned/` — cleaned CSVs (deduplicated, type-corrected, date-parsed)
+- `aggregated/` — monthly / customer / product / supplier / inventory / AR-AP roll-ups
+- `Business Analytics Report_Full Version.xlsx` — fully formatted Excel report
+- `Business Analytics Report_Deidentified Version.xlsx` — customer / product / supplier identifiers masked, monetary amounts scaled, dates shifted
 
-## 與 `pipeline_template/` 的關係
+> The scripts print status messages and report column names in Chinese because
+> they were built for a Chinese-speaking business analyst. The output Excel
+> sheets are likewise Chinese. This is intentional — it's the real tool that
+> serves the real stakeholder.
 
-這份程式是 **領域特定的手寫 ETL**——檔名、欄位、業務邏輯（毛利、RFM、Pareto）全寫死在程式碼裡，要套用到別的資料集得改 60-70% 的程式。
+## Relationship to `pipeline_template/`
 
-從這條管線萃取出來的通用版本在 [`../pipeline_template/`](../pipeline_template/)，
-其中 [`examples/sales_report/config.yaml`](../pipeline_template/examples/sales_report/config.yaml) 用 YAML 設定重現了完全相同的流程，無須改任何程式碼。
+These scripts are a **domain-specific, hand-written ETL** — file names, column names, and business logic (gross margin, RFM, Pareto) are all hard-coded in Python. Adapting them to a different dataset would require rewriting 60–70% of the code.
 
-兩者並存的用意：
+The generic version extracted from this pipeline lives at [`../pipeline_template/`](../pipeline_template/). In particular, [`examples/sales_report/config.yaml`](../pipeline_template/examples/sales_report/config.yaml) reproduces the exact same flow using YAML only — no code changes required.
 
-| 看 `work/` 學到 | 看 `pipeline_template/` 學到 |
+Why both exist:
+
+| Reading `work/` teaches you | Reading `pipeline_template/` teaches you |
 |---|---|
-| 一條完整商業 ETL 長什麼樣、解什麼問題 | 怎麼把硬編碼的程式抽象成可重用框架 |
+| What a complete real-world business ETL looks like and which problems it solves | How to extract the generic pattern from a hard-coded pipeline into a reusable framework |

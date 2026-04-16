@@ -169,12 +169,12 @@ INDICATOR_FUNCS = {
 }
 
 INDICATOR_LABELS = {
-    "political_stability":     "政治穩定度",
-    "energy_self_sufficiency": "能源自給率",
-    "healthcare_quality":      "醫療品質",
-    "immigration_friendliness": "移民友善度",
-    "english_prevalence":      "英語普及率",
-    "conflict_distance":       "距離衝突熱點",
+    "political_stability":     "Political Stability",
+    "energy_self_sufficiency": "Energy Self-Sufficiency",
+    "healthcare_quality":      "Healthcare Quality",
+    "immigration_friendliness": "Immigration Friendliness",
+    "english_prevalence":      "English Prevalence",
+    "conflict_distance":       "Distance from Conflict",
 }
 
 

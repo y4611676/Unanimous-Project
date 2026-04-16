@@ -13,8 +13,8 @@ Config shape::
         source: analyzed               # which subfolder to pull CSVs from
                                        # (cleaned | aggregated | analyzed | anonymized)
         sheets:
-          - {from: monthly, title: 月度營收, number_cols: [revenue], percent_cols: [毛利率]}
-          - {from: customer_agg, title: 客戶排行, percent_cols: [share, cum_share]}
+          - {from: monthly, title: Monthly Revenue, number_cols: [revenue], percent_cols: [margin]}
+          - {from: customer_agg, title: Customer Ranking, percent_cols: [share, cum_share]}
 """
 
 from __future__ import annotations

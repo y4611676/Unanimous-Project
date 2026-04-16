@@ -38,7 +38,7 @@ def test_write_report_emits_xlsx_with_expected_sheets(tmp_path):
                 "filename": "out.xlsx",
                 "source": "aggregated",
                 "sheets": [
-                    {"from": "monthly", "title": "月度營收",
+                    {"from": "monthly", "title": "Monthly Revenue",
                      "number_cols": ["revenue"]},
                     {"from": "rfm", "stage": "analyzed", "title": "RFM"},
                 ],
@@ -49,9 +49,9 @@ def test_write_report_emits_xlsx_with_expected_sheets(tmp_path):
     assert path is not None and path.exists()
 
     wb = load_workbook(path)
-    assert set(wb.sheetnames) == {"月度營收", "RFM"}
+    assert set(wb.sheetnames) == {"Monthly Revenue", "RFM"}
 
-    ws = wb["月度營收"]
+    ws = wb["Monthly Revenue"]
     # Row 1 is the merged page title, row 3 is the header row, data starts at row 4.
     assert ws["A3"].value == "ym"
     assert ws["B3"].value == "revenue"

@@ -48,7 +48,7 @@ base = load_base()
 
 # ─── Sidebar: weight sliders ────────────────────────────────────────────────
 
-st.sidebar.header("⚖️  指標權重")
+st.sidebar.header("⚖️  Indicator Weights")
 st.sidebar.caption("Drag the sliders — total is auto-normalised.")
 
 weights: dict[str, float] = {}
