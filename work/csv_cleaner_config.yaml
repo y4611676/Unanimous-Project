@@ -1,0 +1,61 @@
+# ════════════════════════════════════════════════════════
+# Hurricanes.csv 清理設定
+# 用法: python cleaner.py hurricanes_config.yaml
+# ════════════════════════════════════════════════════════
+
+input:  Hurricanes.csv
+output: Hurricanes_clean.csv
+
+# ── 1. 移除重複列 ──────────────────────────────────────
+drop_duplicates: true
+
+# ── 2. 刪除不需要的欄位 ────────────────────────────────
+drop_columns:
+  - REf          # 引用文獻欄位，分析無用
+
+# ── 3. 欄位重新命名（原始名稱 → 新名稱）──────────────
+rename:
+  "":             id              # 無名 index 欄 (Unnamed: 0)
+  "Wind speed":   wind_speed_mph
+  "Pressure":     pressure_hpa
+  "Areas affected": areas_affected
+  "Deaths":       deaths
+  "Damage":       damage_usd_millions
+
+# ── 4. 清除 Name 欄的多餘引號（e.g. """Cuba""" → Cuba）─
+clean_quotes:
+  - column: Name
+
+# ── 5. 把文字型缺值替換為空值 ─────────────────────────
+#    （pandas 預設不處理 "Unknown"；"None" 已自動轉 NaN）
+replace_with_nan:
+  deaths:
+    - Unknown
+  wind_speed_mph:
+    - Unknown
+  pressure_hpa:
+    - Unknown
+  damage_usd_millions:
+    - Unknown
+    - Heavy
+    - Light
+    - Minor
+    - Moderate
+    - Extensive
+    - Minimal
+
+# ── 6. 從含單位字串中抽出數字 ─────────────────────────
+extract_number:
+  - column: wind_speed_mph
+    pattern: '^(\d+)'          # "90 mph (150 km/h)"  → 90
+  - column: pressure_hpa
+    pattern: '^(\d+)\s*hPa'   # "980 hPa (28.94 inHg)" → 980
+                               # "1007 hPa ..."（逗號已預先移除）→ 1007
+  - column: deaths
+    pattern: '(\d+)'           # 數字 / ">1,000" → 1000
+
+# ── 7. 把 Damage 欄的金額字串轉成百萬美元數值 ─────────
+#    支援格式：$19 million / $2.1 billion / $100 thousand
+#              $$27.9 million / > 230 million / $450,000
+parse_money:
+  - column: damage_usd_millions
