@@ -36,3 +36,10 @@ Python · R · SQL · Pandas · Seaborn · DuckDB · tidyverse · ggplot2 · Jup
 pip install -r requirements.txt
 # Framework details: pipeline_template/README.md
 ```
+
+## Contact
+
+Available for hire on:
+
+- **[Fiverr](https://www.fiverr.com/s/1qygL2p)**
+- **[Upwork](https://www.upwork.com/freelancers/~01b65d6c83ca0d5d8e)**
