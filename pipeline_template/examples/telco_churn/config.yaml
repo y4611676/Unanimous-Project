@@ -122,14 +122,14 @@ output:
     filename: telco_churn_report.xlsx
     source: aggregated
     sheets:
-      - {from: churn_by_contract, title: Contract 流失率,
+      - {from: churn_by_contract, title: Churn by Contract,
          number_cols: [monthly_revenue, churn_revenue_loss],
          percent_cols: [churn_rate]}
-      - {from: churn_by_payment, title: Payment 流失率,
+      - {from: churn_by_payment, title: Churn by Payment,
          number_cols: [churn_revenue_loss], percent_cols: [churn_rate]}
-      - {from: churn_by_internet, title: Internet 流失率,
+      - {from: churn_by_internet, title: Churn by Internet,
          number_cols: [churn_revenue_loss], percent_cols: [churn_rate]}
-      - {from: high_value_customers, stage: analyzed, title: 高價值客戶 80/20,
+      - {from: high_value_customers, stage: analyzed, title: High-Value Customers 80-20,
          number_cols: [total_charges], percent_cols: [share, cum_share]}
-      - {from: top50_at_risk_spenders, stage: analyzed, title: Top50 月費客戶,
+      - {from: top50_at_risk_spenders, stage: analyzed, title: Top 50 At-Risk Spenders,
          number_cols: [total_charges, monthly_charges]}

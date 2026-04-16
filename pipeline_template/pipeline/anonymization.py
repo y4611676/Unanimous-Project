@@ -1,7 +1,7 @@
 """Config-driven anonymisation stage.
 
-Replaces the hard-coded MONEY_COLS / DATE_COLS dictionaries and Chinese label
-tables in work/step4_anonymize.py. Rules are declared per-table in YAML:
+Replaces the hard-coded MONEY_COLS / DATE_COLS dictionaries and label tables in
+work/step4_anonymize.py. Rules are declared per-table in YAML:
 
     anonymization:
       seed: 20240101
@@ -13,10 +13,10 @@ tables in work/step4_anonymize.py. Rules are declared per-table in YAML:
         - col: cusno
           prefix: CUST
           label_col: cusnm      # optional paired name column
-          label: 客戶
+          label: Cust
       rules:
         monthly:                # table name as produced by the aggregation stage
-          money_cols: [銷售額, 採購額, 毛利]
+          money_cols: [sales, purchases, gross_profit]
         sales:
           date_cols: [sdate]
           money_cols: [tot, price]

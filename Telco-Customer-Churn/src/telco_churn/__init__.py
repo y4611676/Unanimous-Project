@@ -1,4 +1,4 @@
-"""Telco customer churn — 教學用資料清理與分析輔助模組。"""
+"""Telco customer churn — educational helper module for cleaning and analysis."""
 
 from telco_churn.cleaning import clean_telco_churn
 

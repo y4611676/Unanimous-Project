@@ -87,10 +87,10 @@ output:
     filename: report.xlsx
     source: aggregated                # default stage to pull sheets from
     sheets:
-      - {from: monthly,       title: 月度營收,   number_cols: [revenue]}
-      - {from: customer_agg,  title: 客戶排行,   number_cols: [revenue],
+      - {from: monthly,       title: Monthly Revenue, number_cols: [revenue]}
+      - {from: customer_agg,  title: Customer Ranking, number_cols: [revenue],
          percent_cols: [share, cum_share]}
-      - {from: rfm, stage: analyzed, title: RFM 分數}
+      - {from: rfm, stage: analyzed, title: RFM Scores}
 
 # ---------------------------------------------------------------------------
 # 4. ANONYMIZE — optional; omit this section to skip the stage entirely.
@@ -101,7 +101,7 @@ anonymization:
   date_shift_months: random         # or an explicit int, e.g. -42
 
   id_mappings:
-    - {col: customer_id, prefix: CUST, label_col: customer_name, label: 客戶}
+    - {col: customer_id, prefix: CUST, label_col: customer_name, label: Cust}
 
   rules:
     monthly:

@@ -62,15 +62,15 @@ def _run_checks(df: pd.DataFrame, checks: list[dict[str, Any]]) -> list[str]:
         if kind == "non_negative":
             n = (df[col] < 0).sum()
             if n:
-                issues.append(f"{col} 負值 {n} 筆")
+                issues.append(f"{col}: {n} negative value(s)")
         elif kind == "non_zero":
             n = (df[col] == 0).sum()
             if n:
-                issues.append(f"{col} 為 0 的筆數：{n}")
+                issues.append(f"{col}: {n} zero value(s)")
         elif kind == "not_null":
             n = df[col].isna().sum()
             if n:
-                issues.append(f"{col} 缺值 {n} 筆")
+                issues.append(f"{col}: {n} null value(s)")
     return issues
 
 
@@ -98,7 +98,7 @@ def clean_source(source_cfg: dict[str, Any], src_dir: str, out_dir: str) -> pd.D
     if key_col and key_col in df.columns:
         dup = df.duplicated(subset=[key_col]).sum()
         if dup:
-            issues.append(f"重複 {key_col} {dup} 筆（保留第一筆）")
+            issues.append(f"{dup} duplicate(s) on {key_col} (keeping the first)")
         df = df.drop_duplicates(subset=[key_col], keep="first")
 
     report_cleaning(name, n_before, len(df), issues)
