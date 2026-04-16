@@ -199,10 +199,244 @@ def anomaly_detection(sale_full: pd.DataFrame) -> pd.DataFrame:
 
 
 # ══════════════════════════════════════════════════════════
-# TODO (next pass): analyses 4-6 + sheet writers + main()
-#   - market_basket_analysis()
-#   - sales_forecast()
-#   - churn_risk_scoring()
-#   - sheet_* functions for each
+# Analysis 4: Market Basket Analysis (product co-occurrence + lift)
+# ══════════════════════════════════════════════════════════
+
+def market_basket_analysis(sale_full: pd.DataFrame, top_n: int = 30) -> pd.DataFrame:
+    """Find which products are frequently bought together in the same order.
+
+    For each unordered pair (A, B):
+      - count = number of orders containing BOTH A and B
+      - support_A, support_B = how often each product appears on its own
+      - lift = P(A AND B) / (P(A) * P(B))
+        lift > 1 → bought together more often than chance (cross-sell candidates)
+        lift = 1 → independent (no relationship)
+        lift < 1 → substitutes (customers pick one or the other)
+
+    Why lift and not just count? A very popular product will pair with
+    everything by sheer volume. Lift corrects for that baseline popularity.
+
+    Returns top_n pairs sorted by lift (min count 2 to filter noise).
+    """
+    required = {"salno", "prdno"}
+    if sale_full.empty or not required.issubset(sale_full.columns):
+        return pd.DataFrame()
+
+    # One (order, product) row per line; dedupe in case the same product
+    # appears twice on one order (it shouldn't affect pair counts).
+    lines = sale_full[["salno", "prdno"]].dropna().drop_duplicates()
+    if len(lines) < 2:
+        return pd.DataFrame()
+
+    # Optional product name lookup for readable output
+    name_map = {}
+    if "prdnm" in sale_full.columns:
+        name_map = (
+            sale_full.dropna(subset=["prdno"])
+                    .drop_duplicates("prdno")
+                    .set_index("prdno")["prdnm"]
+                    .to_dict()
+        )
+
+    total_orders = lines["salno"].nunique()
+    if total_orders == 0:
+        return pd.DataFrame()
+
+    # Support per product: fraction of orders containing this product
+    prod_support = (
+        lines.groupby("prdno")["salno"].nunique() / total_orders
+    ).to_dict()
+
+    # Build pair counts via self-join on salno, then keep each unordered pair once
+    # (A,B where A < B alphabetically — eliminates (A,A) and (B,A) duplicates).
+    joined = lines.merge(lines, on="salno", suffixes=("_a", "_b"))
+    pairs = joined[joined["prdno_a"] < joined["prdno_b"]]
+    if pairs.empty:
+        return pd.DataFrame()
+
+    pair_counts = (
+        pairs.groupby(["prdno_a", "prdno_b"])["salno"]
+             .nunique()
+             .reset_index(name="count")
+    )
+    # Filter out pairs that only co-occur once — too noisy to be meaningful.
+    pair_counts = pair_counts[pair_counts["count"] >= 2]
+    if pair_counts.empty:
+        return pd.DataFrame()
+
+    # Compute lift for each pair
+    pair_counts["support_pair"] = pair_counts["count"] / total_orders
+    pair_counts["support_a"] = pair_counts["prdno_a"].map(prod_support)
+    pair_counts["support_b"] = pair_counts["prdno_b"].map(prod_support)
+    pair_counts["lift"] = (
+        pair_counts["support_pair"]
+        / (pair_counts["support_a"] * pair_counts["support_b"])
+    )
+    # Attach product names if available
+    pair_counts["name_a"] = pair_counts["prdno_a"].map(name_map).fillna("")
+    pair_counts["name_b"] = pair_counts["prdno_b"].map(name_map).fillna("")
+
+    return (
+        pair_counts.sort_values("lift", ascending=False)
+                  .head(top_n)
+                  [["prdno_a", "name_a", "prdno_b", "name_b", "count", "lift"]]
+                  .reset_index(drop=True)
+    )
+
+
+# ══════════════════════════════════════════════════════════
+# Analysis 5: Sales Forecast (exponential smoothing + seasonal adjustment)
+# ══════════════════════════════════════════════════════════
+
+def sales_forecast(monthly: pd.DataFrame, horizon: int = 3) -> pd.DataFrame:
+    """Project the next `horizon` months of sales.
+
+    Method selection based on available history:
+      - >= 24 months: trend (EWMA) + seasonal adjustment (month-of-year avg deviation)
+      - >=  6 months: trend only (EWMA extrapolation)
+      -  <  6 months: not enough data → return empty
+
+    Why EWMA? Recent months weigh more than old ones (reacts to regime shifts).
+    Why not ARIMA/Prophet? Those need extra deps and tuning. For a 3-month
+    directional forecast, EWMA + seasonal adjust is usually within 10-15% of
+    more complex models and far easier to audit.
+
+    Returns a DataFrame with columns: ym, sales (actual or forecast), type.
+    type = "actual" for historical rows, "forecast" for projected rows.
+    """
+    if monthly.empty or "sales" not in monthly.columns or len(monthly) < 6:
+        return pd.DataFrame()
+
+    df = monthly.sort_values("ym").reset_index(drop=True).copy()
+    df["sales"] = pd.to_numeric(df["sales"], errors="coerce").fillna(0)
+    df["type"] = "actual"
+
+    # EWMA trend: alpha=0.3 → recent month = 30% weight, long tail = 70%.
+    # This is a reasonable middle ground; increase for more reactive forecasts.
+    trend = df["sales"].ewm(alpha=0.3, adjust=False).mean()
+    last_trend = float(trend.iloc[-1])
+    # Use last-6-month trend slope for gentle extrapolation (not pure flat line).
+    recent_slope = float((trend.iloc[-1] - trend.iloc[-6]) / 6) if len(trend) >= 6 else 0.0
+
+    # Seasonal factors (only if we have >= 2 full years)
+    seasonal_map = {}
+    if len(df) >= 24:
+        df["month"] = df["ym"].astype(str).str[-2:].astype(int)
+        # Deviation of each month from the trend, averaged across years
+        df["detrended"] = df["sales"] - trend
+        month_avg = df.groupby("month")["detrended"].mean()
+        month_avg = month_avg - month_avg.mean()  # center on zero
+        seasonal_map = month_avg.to_dict()
+
+    # Parse last ym to roll forward the period
+    last_ym = str(df["ym"].iloc[-1])
+    try:
+        last_period = pd.Period(last_ym, freq="M")
+    except Exception:
+        return df[["ym", "sales", "type"]]
+
+    # Build forecast rows
+    forecast_rows = []
+    for step in range(1, horizon + 1):
+        next_period = last_period + step
+        month_num = next_period.month
+        projected = last_trend + recent_slope * step
+        if seasonal_map:
+            projected += seasonal_map.get(month_num, 0.0)
+        forecast_rows.append({
+            "ym": str(next_period),
+            "sales": max(0.0, projected),  # sales can't go negative
+            "type": "forecast",
+        })
+
+    out = pd.concat(
+        [df[["ym", "sales", "type"]], pd.DataFrame(forecast_rows)],
+        ignore_index=True,
+    )
+    return out
+
+
+# ══════════════════════════════════════════════════════════
+# Analysis 6: Churn Risk Scoring (logistic regression on RFM features)
+# ══════════════════════════════════════════════════════════
+
+def churn_risk_scoring(cust_agg: pd.DataFrame) -> pd.DataFrame:
+    """Estimate probability each customer will churn.
+
+    Labeling approach (no explicit churn column in the data):
+      A customer is labeled "churned" if their R_days (days since last
+      transaction) falls in the top 25% of the distribution. This is a
+      heuristic — the real definition depends on the business's sales cycle.
+
+    Features: R_days, order_count, sales, avg_order_value (if available).
+    Model: logistic regression (sklearn), which is interpretable and stable
+           on small datasets. The `churn_prob` column is the predicted
+           probability — customers with prob > 0.5 are high risk.
+
+    Returns cust_agg enriched with `churn_prob` and `churn_flag` columns,
+    sorted by risk descending. Returns empty DataFrame if sklearn missing
+    or data too small (< 20 customers for any reliable split).
+    """
+    if cust_agg.empty or "last_transaction" not in cust_agg.columns:
+        return pd.DataFrame()
+    if len(cust_agg) < 20:
+        # Logistic regression needs enough variety; small-sample scores would
+        # be meaningless. Below this threshold, skip gracefully.
+        return pd.DataFrame()
+
+    try:
+        from sklearn.linear_model import LogisticRegression
+        from sklearn.preprocessing import StandardScaler
+    except ImportError:
+        # sklearn is in requirements.txt, but fail gracefully in minimal installs
+        return pd.DataFrame()
+
+    df = cust_agg.copy()
+    df["last_transaction"] = pd.to_datetime(df["last_transaction"], errors="coerce")
+    df = df.dropna(subset=["last_transaction"])
+    if df.empty:
+        return pd.DataFrame()
+
+    # R_days relative to the latest transaction in the dataset
+    ref_date = df["last_transaction"].max()
+    df["R_days"] = (ref_date - df["last_transaction"]).dt.days
+
+    # Label: top-quartile R_days = churned (no contact for a long time)
+    threshold = df["R_days"].quantile(0.75)
+    df["is_churned"] = (df["R_days"] >= threshold).astype(int)
+    # If the label is degenerate (all same class), can't train — bail out
+    if df["is_churned"].nunique() < 2:
+        return pd.DataFrame()
+
+    feature_cols = [c for c in ["R_days", "order_count", "sales", "avg_order_value"]
+                    if c in df.columns]
+    if len(feature_cols) < 2:
+        return pd.DataFrame()
+
+    # Convert features to numeric, fill NaN with 0 (missing = low activity)
+    X = df[feature_cols].apply(pd.to_numeric, errors="coerce").fillna(0).values
+    y = df["is_churned"].values
+
+    # Standardize so all features contribute fairly regardless of scale
+    # (R_days in 100s, order_count in 10s, sales in 1000s without this)
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # max_iter bumped up so convergence warning doesn't spam on small data
+    model = LogisticRegression(max_iter=1000, random_state=42)
+    model.fit(X_scaled, y)
+
+    df["churn_prob"] = model.predict_proba(X_scaled)[:, 1]
+    df["churn_flag"] = np.where(df["churn_prob"] >= 0.5, "High Risk", "Low Risk")
+
+    keep = [c for c in ["cusno", "cusnm", "order_count", "sales",
+                        "R_days", "churn_prob", "churn_flag"] if c in df.columns]
+    return df[keep].sort_values("churn_prob", ascending=False).reset_index(drop=True)
+
+
+# ══════════════════════════════════════════════════════════
+# TODO (next pass): sheet writers + main()
+#   - sheet_seasonality, sheet_cohort, sheet_anomaly,
+#     sheet_basket, sheet_forecast, sheet_churn
 #   - main() entry point
 # ══════════════════════════════════════════════════════════
