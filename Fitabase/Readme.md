@@ -1,120 +1,123 @@
-### How Can a Wellness Technology Company Play It Smart?
+# When Are Your Users Actually Paying Attention, and What Are They Failing At?
 
-**Data Source**: [FitBit Fitness Tracker Data](https://www.kaggle.com/datasets/arashnic/fitbit) (CC0: Public Domain, via Mobius) — 30 Fitbit users
+An analysis of Fitbit wearable data that found **even health-conscious users spend 81% of their day sedentary and sleep 6.9 hours on average** — and identified the exact moments a wellness product can intervene to change behavior.
 
----
+## This analysis is for you if:
 
-### Key Findings
-
-- **81% of the average day is sedentary** — even among fitness tracker users — only 3% is fairly/very active
-- **Average sleep: 6.9 hrs** — below the recommended 7–9 hrs for adults, with a near-perfect correlation between time-in-bed and sleep logged
-- **Activity peaks at 5–7 PM and 12 PM**; Tuesday averages 8,125 steps vs. Sunday's 6,933 (the clear rest day)
-- **Recommendation**: schedule Bellabeat push-notifications during peak hours, build a sleep-improvement campaign linking Leaf/Time devices to bedtime reminders, and gamify hourly movement nudges to break sedentary patterns
-
-See [`Fitabase_Wellness_Analysis.pdf`](./Fitabase_Wellness_Analysis.pdf) for the full report.
+- You have a consumer app or device and engagement metrics look "fine" on paper but users aren't hitting their goals
+- You're sending push notifications at times that make sense to *you*, not to your users
+- You suspect there's a gap between what your users say they want (sleep better, move more) and what they actually do — but you can't prove it to product or marketing
 
 ---
 
-### Scenario
-1. Data analyst working at a leading manufacturer of health-focused products for women, tasked with analyzing smart device data to unearth growth opportunities.
-2. The company's co-founder and Chief Creative Officer believes leveraging smart device fitness data can drive this growth.
-3. Examining consumer usage patterns and deriving insights to shape the company's marketing strategy.
+## What We Found (And How It Changes Product Decisions)
 
-### Characters
-- **Ur**: Co-founder and Chief Creative Officer.
-- **Mur**: Co-founder and mathematician, key member of the executive team.
-- **Marketing analytics team**: Responsible for collecting, analyzing, and reporting data to guide marketing strategy.
+This was data from users who opted into a fitness tracker — people already motivated to be healthier. The gap between intent and reality was still enormous. That gap is your product opportunity.
 
-### Products
-- **App**: Provides users with health data on activity, sleep, stress, menstrual cycle, and mindfulness habits.
-- **Leaf**: Classic wellness tracker worn as a bracelet, necklace, or clip — tracks activity, sleep, and stress.
-- **Time**: Wellness watch combining a classic timepiece with smart technology to track activity, sleep, and stress.
-- **Spring**: Water bottle that tracks daily water intake using smart technology.
-- **Membership**: Subscription-based program providing personalized guidance on nutrition, activity, sleep, and mindfulness.
+### Finding 1: 81% of the day is sedentary — even for fitness users
 
-### About the Company
-Founded by Ur and Mur, the company is a high-tech firm specializing in health-focused smart products. By leveraging data collection on activity, sleep, stress, and reproductive health, it empowers women with insights into their health and habits.
+Only 3% of the average day hits "fairly" or "very active." These users bought a device specifically to move more, and they're still sitting almost all day.
 
----
+**Product implication:** The problem isn't motivation, it's **friction at the right moment.** Every sedentary hour is a chance to nudge. If your notification strategy is daily summaries, you're missing the actual decision point by hours.
 
-### Deliverables
-1. A clear statement of the business task — **Ask**
-2. A description of all data sources used — **Prepare**
-3. Documentation of any cleaning or manipulation of data — **Process**
-4. A summary of analysis — **Analyze**
-5. Supporting visualizations and key findings — **Share**
-6. Top three recommendations based on analysis — **Act**
+### Finding 2: Sleep averages 6.9 hours — below the 7–9 hour recommendation
 
----
+And there's an almost perfect correlation between time-in-bed and time-asleep. Users aren't tossing and turning. They're just **not going to bed in time.**
 
-### Ask
-**Business Task**:
-1. What are some trends in smart device usage?
-2. How could these trends apply to customers?
-3. How could these trends help influence the marketing strategy?
+**Product implication:** Sleep-improvement campaigns should target the *bedtime decision*, not the sleep itself. "Wind down in 30 min" at the right evening hour beats a sleep-quality report the next morning.
+
+### Finding 3: Clear activity peaks at 5–7 PM and 12 PM
+
+Tuesdays average 8,125 steps; Sundays drop to 6,933. The pattern is crisp: lunch, post-work, weekday-heavy.
+
+**Product implication:** Push notifications at 5 PM on Tuesdays have maximum context. Sunday mornings are the worst time to reach these users with activity prompts. Match your messaging schedule to their real lives, not your content calendar.
+
+### Recommended actions for the product team
+
+- Schedule notifications during **peak activity windows** (12 PM, 5–7 PM) instead of flat daily sends
+- Build a **sleep-improvement campaign** that links wellness devices to bedtime reminders — target the bedtime decision, not the morning regret
+- Gamify **hourly movement nudges** to break sedentary streaks — the issue is friction, not willpower
+
+Full report: [`Fitabase_Wellness_Analysis.pdf`](./Fitabase_Wellness_Analysis.pdf)
 
 ---
 
-### Prepare
-**Data Sources**:
-The primary data source is the FitBit Fitness Tracker Data, available under CC0: Public Domain and accessible through Mobius. It encompasses personal fitness tracker information from 30 Fitbit users who consented to submit their data.
+## What You Get
 
-**ROCCC Assessment**:
-1. **Reliability**: LOW — dataset collected from 30 individuals of unknown gender.
-2. **Originality**: LOW — third-party data collected via Amazon Mechanical Turk.
-3. **Comprehensive**: MEDIUM — contains fields on daily activity intensity, calories, steps, sleep time, and weight.
-4. **Current**: MEDIUM — data is a few years old, but lifestyle habits change slowly.
-5. **Cited**: HIGH — data collector and source are well documented.
+A usage-pattern map that tells your product and marketing teams where to intervene:
 
----
-
-### Process
-**Data Cleaning**:
-Used R in Visual Studio to record and archive the results of each step. A complete network disconnect and archive was performed at project completion for future reference.
+| Output | Decision It Supports |
+|--------|---------------------|
+| Activity distribution (sedentary vs. active) | Is your product actually moving the behavior it promises? |
+| Peak-hour heatmap | When to send notifications, launch campaigns, release features |
+| Day-of-week patterns | Which days are growth days vs. retention days |
+| Sleep vs. time-in-bed correlation | Where users are failing — and whether it's the right failure to solve |
+| Three ranked product/marketing actions | What to ship or test next sprint |
 
 ---
 
-### Analyze
+## Want the Same Analysis on Your Data?
 
-**Steps vs. Calories Burned**:
-Positive correlation between steps taken and calories burned — the more active the user, the more calories burned.
+If you run a consumer app, wearable, wellness product, or any business with per-user engagement data, the same pattern-mapping applies.
+
+**What we need from you:**
+- User-level event data (sessions, actions, timestamps — at whatever granularity you collect)
+- Your goal metric (is it DAU, conversion, retention, goal completion?)
+- Basic product context (what do users think they're buying?)
+
+**What you get back:**
+- A clear picture of when users are actually engaged vs. when you *think* they are
+- Specific behavioral gaps between stated intent and actual behavior
+- A ranked list of product/marketing interventions, timed to the actual rhythm of user behavior
+
+Reach out through the portfolio main page.
+
+---
+
+## For Technical Readers
+
+### Data Source
+
+[FitBit Fitness Tracker Data](https://www.kaggle.com/datasets/arashnic/fitbit) (CC0: Public Domain, via Mobius) — 30 Fitbit users.
+
+### Approach
+
+- **Tools**: R in Visual Studio
+- **Framework**: Ask → Prepare → Process → Analyze → Share → Act
+- **Scenario**: Analyst at a health-tech company selling wellness products to women. The product line includes an app, two wearables, a smart water bottle, and a subscription service for personalized guidance.
+
+### ROCCC Data Assessment
+
+| Dimension | Rating | Notes |
+|-----------|--------|-------|
+| Reliability | LOW | 30 individuals of unknown gender |
+| Originality | LOW | Third-party data (Amazon Mechanical Turk) |
+| Comprehensive | MEDIUM | Activity intensity, calories, steps, sleep, weight |
+| Current | MEDIUM | A few years old; habits change slowly |
+| Cited | HIGH | Collector and source well documented |
+
+### Key Visualizations
+
+**Steps vs. Calories Burned** — strong positive correlation; the more active, the more calories.
 ![Steps vs Calories](https://github.com/y4611676/Unanimous-Project/assets/71640831/e9b7ba17-c270-490c-95c4-03850083cfab)
 
-**Sleep Hours vs. Time in Bed**:
-Strong positive correlation. Users who want to improve well-being should focus on increasing total time in bed.
+**Sleep Hours vs. Time in Bed** — near-perfect correlation; the bottleneck is bedtime, not sleep quality.
 ![Sleep vs Bed Time](https://github.com/y4611676/Unanimous-Project/assets/71640831/c6bbde99-ef6a-45c1-be81-9a216178b9d1)
 
-**Activity Levels by Day of Week**:
-Sedentary activity dominates across all days with no significant variation by weekday.
+**Activity Levels by Day of Week** — sedentary time dominates every day; no weekend escape.
 ![Activity by Day](https://github.com/y4611676/Unanimous-Project/assets/71640831/51fa8fd9-9710-490a-a7ac-ccec9db2ac1b)
 
-**Average Steps per Weekday**:
-Weekends and Wednesdays show a slight increase compared to other days, likely due to non-working schedules.
+**Average Steps per Weekday** — slight mid-week and weekend peaks.
 ![Steps per Weekday](https://github.com/y4611676/Unanimous-Project/assets/71640831/a1da9e86-94de-4a52-8554-d756e74fc85d)
 
-**Peak Activity Hours**:
-Most active hours are 5–7 PM (after work) and around 12 PM (lunch break).
+**Peak Activity Hours** — 5–7 PM and 12 PM stand out clearly.
 ![Peak Hours](https://github.com/y4611676/Unanimous-Project/assets/71640831/93af6136-b0cc-41e7-add5-c58e90c69474)
 
----
+### Deliverables Checklist
 
-### Share
-**Smart Device Usage Trends**:
-- Peak activity hours: 5–7 PM and 12 PM.
-- Slight activity increase on weekends and Wednesdays.
-- No significant differences in activity levels on other weekdays.
-
-**Marketing Strategy Implications**:
-- Tailor push notifications and marketing to peak activity hours.
-- Consider non-working day promotions.
-- Optimize campaigns based on observed usage trends.
-
----
-
-### Act
-**Top Recommendations**:
-1. Set reminders during peak activity hours to engage users in physical exercise if calorie goals are unmet.
-2. Record average wake-up times to recommend optimal bedtimes for better rest.
-3. Create varied activity programs to suit different schedules and preferences.
-4. Gamify usage to incentivize goal achievement and promote engagement.
-5. Use data-driven insights to continuously optimize marketing initiatives.
+1. **Ask** — business task: find smart-device usage trends that inform marketing strategy
+2. **Prepare** — Fitbit data, CC0 licensed, documented above
+3. **Process** — data cleaning in R, archived for reproducibility
+4. **Analyze** — activity patterns, sleep, time-of-day breakdown
+5. **Share** — visualizations above
+6. **Act** — ranked recommendations for notification timing, campaign design, and gamification
