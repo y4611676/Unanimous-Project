@@ -185,3 +185,114 @@ def test_step4_english_money_cols():
     for key, cols in MONEY_COLS.items():
         for col in cols:
             assert col.isascii(), f"Non-ASCII column name '{col}' in MONEY_COLS['{key}']"
+
+
+# ── step5 ────────────────────────────────────────────────
+
+def test_step5_import():
+    sys.path.insert(0, str(WORK_DIR))
+    import step5_advanced
+    for fn in ["seasonality_decomposition", "cohort_analysis", "anomaly_detection",
+              "market_basket_analysis", "sales_forecast", "churn_risk_scoring"]:
+        assert hasattr(step5_advanced, fn), f"Missing {fn}"
+
+
+def test_step5_graceful_empty():
+    """All 6 analyses must return empty DataFrame on empty input (not crash)."""
+    sys.path.insert(0, str(WORK_DIR))
+    from step5_advanced import (
+        seasonality_decomposition, cohort_analysis, anomaly_detection,
+        market_basket_analysis, sales_forecast, churn_risk_scoring,
+    )
+    empty = pd.DataFrame()
+    for fn in [seasonality_decomposition, cohort_analysis, anomaly_detection,
+               market_basket_analysis, sales_forecast, churn_risk_scoring]:
+        assert fn(empty).empty, f"{fn.__name__} should return empty on empty input"
+
+
+def test_step5_seasonality_decomposition():
+    sys.path.insert(0, str(WORK_DIR))
+    from step5_advanced import seasonality_decomposition
+    # 24 months with deliberate Nov/Dec uplift
+    dates = pd.period_range("2022-01", "2023-12", freq="M").astype(str)
+    monthly = pd.DataFrame({
+        "ym": dates,
+        "sales": [100 + i*5 + (20 if (i % 12) in [10, 11] else 0) for i in range(24)],
+    })
+    result = seasonality_decomposition(monthly)
+    assert not result.empty
+    assert {"ym", "sales", "trend", "seasonal", "residual"}.issubset(result.columns)
+    # Nov/Dec should have a positive seasonal component
+    nov_dec = result[result["ym"].astype(str).str[-2:].isin(["11", "12"])]
+    assert nov_dec["seasonal"].mean() > 0
+
+
+def test_step5_anomaly_detection():
+    sys.path.insert(0, str(WORK_DIR))
+    from step5_advanced import anomaly_detection
+    # 19 normal rows + 1 obvious outlier
+    sale_full = pd.DataFrame({
+        "salno": [f"S{i}" for i in range(20)],
+        "prdno": ["P1"] * 20,
+        "prqty": [1] * 19 + [999],
+        "price": [100] * 20,
+        "rev":   [100] * 19 + [99900],
+    })
+    result = anomaly_detection(sale_full)
+    assert len(result) == 1
+    assert result.iloc[0]["salno"] == "S19"
+    assert "rev" in result.iloc[0]["flag"] or "prqty" in result.iloc[0]["flag"]
+
+
+def test_step5_market_basket():
+    sys.path.insert(0, str(WORK_DIR))
+    from step5_advanced import market_basket_analysis
+    # 5 orders, products A/B frequently together
+    sale_full = pd.DataFrame({
+        "salno": ["S1","S1","S2","S2","S3","S3","S4","S4","S5","S5"],
+        "prdno": ["A","B","A","B","A","B","A","B","A","B"],
+    })
+    result = market_basket_analysis(sale_full)
+    assert not result.empty
+    assert {"prdno_a", "prdno_b", "count", "lift"}.issubset(result.columns)
+
+
+def test_step5_sales_forecast():
+    sys.path.insert(0, str(WORK_DIR))
+    from step5_advanced import sales_forecast
+    # 12 months — enough for trend-only forecast
+    dates = pd.period_range("2023-01", "2023-12", freq="M").astype(str)
+    monthly = pd.DataFrame({"ym": dates, "sales": range(100, 220, 10)})
+    result = sales_forecast(monthly, horizon=3)
+    assert not result.empty
+    # Should have historical + 3 forecast rows
+    assert (result["type"] == "forecast").sum() == 3
+    assert (result["type"] == "actual").sum() == 12
+
+
+def test_step5_churn_risk():
+    sys.path.insert(0, str(WORK_DIR))
+    from step5_advanced import churn_risk_scoring
+    try:
+        import sklearn  # noqa
+    except ImportError:
+        pytest.skip("sklearn not installed")
+    # 30 customers with varied recency
+    import numpy as np
+    np.random.seed(42)
+    n = 30
+    cust = pd.DataFrame({
+        "cusno": [f"C{i:03d}" for i in range(n)],
+        "cusnm": [f"Cust{i}" for i in range(n)],
+        "order_count": np.random.randint(1, 30, n),
+        "sales": np.random.randint(1000, 100000, n),
+        "avg_order_value": np.random.randint(100, 5000, n),
+        "last_transaction": (pd.to_datetime("2024-01-01") -
+                             pd.to_timedelta(np.random.randint(0, 730, n), unit="D")
+                            ).astype(str),
+    })
+    result = churn_risk_scoring(cust)
+    assert not result.empty
+    assert {"churn_prob", "churn_flag"}.issubset(result.columns)
+    # Probabilities in [0, 1]
+    assert result["churn_prob"].between(0, 1).all()

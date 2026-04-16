@@ -435,8 +435,267 @@ def churn_risk_scoring(cust_agg: pd.DataFrame) -> pd.DataFrame:
 
 
 # ══════════════════════════════════════════════════════════
-# TODO (next pass): sheet writers + main()
-#   - sheet_seasonality, sheet_cohort, sheet_anomaly,
-#     sheet_basket, sheet_forecast, sheet_churn
-#   - main() entry point
+# Excel sheet writers — reuse step3's styling helpers for visual consistency
 # ══════════════════════════════════════════════════════════
+# Lazy import inside functions to avoid hard dependency at import time
+# (so the analysis functions alone can be reused without openpyxl styling).
+
+def _import_step3():
+    """Dynamic import so step5 can run even if step3 is moved/renamed later."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location(
+        "step3_analyze", Path(__file__).parent / "step3_analyze.py"
+    )
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def sheet_seasonality(wb, monthly, s3):
+    """Draw decomposition table + stacked line chart (actual/trend/seasonal)."""
+    ws = wb.create_sheet("Seasonality")
+    s3.page_title(ws, "Seasonality Decomposition", 5)
+
+    df = seasonality_decomposition(monthly)
+    if df.empty:
+        ws["A2"] = "Need at least 13 months of data for decomposition"; return
+
+    for ci, h in enumerate(["Month", "Sales", "Trend", "Seasonal", "Residual"], 1):
+        s3.hdr(ws, 3, ci, h)
+    for i, r in df.reset_index(drop=True).iterrows():
+        row = i + 4
+        bg = s3.GRAY if i % 2 == 0 else s3.WHITE
+        s3.cel(ws, row, 1, r["ym"], align="center", bg=bg)
+        s3.cel(ws, row, 2, round(float(r["sales"]), 0),    "#,##0", bg=bg)
+        s3.cel(ws, row, 3, round(float(r["trend"] or 0), 0),   "#,##0", bg=bg)
+        s3.cel(ws, row, 4, round(float(r["seasonal"] or 0), 0), "#,##0", bg=bg)
+        s3.cel(ws, row, 5, round(float(r["residual"] or 0), 0), "#,##0", bg=bg)
+    s3.border(ws, 3, 3 + len(df), 1, 5)
+
+    # Line chart: actual vs trend (on-sheet, anchored right of the table)
+    n = len(df)
+    chart = LineChart()
+    chart.title = "Sales vs Trend"
+    chart.height = 10; chart.width = 20
+    data_ref = Reference(ws, min_col=2, max_col=3, min_row=3, max_row=3 + n)
+    chart.add_data(data_ref, titles_from_data=True)
+    cats = Reference(ws, min_col=1, min_row=4, max_row=3 + n)
+    chart.set_categories(cats)
+    ws.add_chart(chart, "G3")
+    s3.widths(ws, {"A": 12, "B": 14, "C": 14, "D": 14, "E": 14})
+
+
+def sheet_cohort(wb, sale_full, s3):
+    """Retention matrix: cohort month (rows) × months-since-join (cols)."""
+    ws = wb.create_sheet("Cohort Analysis")
+    s3.page_title(ws, "Customer Cohort Retention", 12)
+
+    df = cohort_analysis(sale_full)
+    if df.empty:
+        ws["A2"] = "No cohort data (requires sale_full.csv with cusno + sdate)"; return
+
+    # Cap visible columns so the sheet stays readable (first year of retention is usually enough)
+    cohort_cols = [c for c in df.columns if c != "cohort_month"][:13]
+    headers = ["Cohort"] + [f"M{c}" for c in cohort_cols]
+    for ci, h in enumerate(headers, 1):
+        s3.hdr(ws, 3, ci, h)
+
+    # Heatmap-style shading: darker = more retained customers (relative to M0)
+    for i, r in df.iterrows():
+        row = i + 4
+        m0 = float(r[cohort_cols[0]]) if cohort_cols else 0.0
+        s3.cel(ws, row, 1, str(r["cohort_month"]), align="center")
+        for ci, c in enumerate(cohort_cols, 2):
+            val = float(r[c]) if pd.notna(r[c]) else 0
+            # Retention ratio drives background intensity; M0 always = 1.0 (full cohort)
+            ratio = val / m0 if m0 > 0 else 0
+            # Simple 3-tier coloring — green for high retention, yellow mid, red low
+            if ratio >= 0.5:   bg = "C6EFCE"
+            elif ratio >= 0.2: bg = "FFEB9C"
+            elif ratio > 0:    bg = "FFC7CE"
+            else:              bg = s3.WHITE
+            s3.cel(ws, row, ci, int(val), "#,##0", bg=bg, align="center")
+    s3.border(ws, 3, 3 + len(df), 1, len(headers))
+    s3.widths(ws, {get_column_letter(i): 10 for i in range(1, len(headers) + 1)})
+
+
+def sheet_anomaly(wb, sale_full, s3):
+    """List of IQR-flagged sale lines, sorted by which metric tripped the rule."""
+    ws = wb.create_sheet("Anomaly Detection")
+    s3.page_title(ws, "Anomalous Sales Lines (IQR outliers)", 10)
+
+    df = anomaly_detection(sale_full)
+    if df.empty:
+        ws["A2"] = "No anomalies detected (or insufficient data)"; return
+
+    cols = list(df.columns)
+    # Friendly headers for known technical columns
+    hdrs_map = {"salno": "Sale ID", "sdate": "Date", "cusno": "Cust ID",
+                "cusnm": "Customer", "prdno": "Prod ID", "prdnm": "Product",
+                "prqty": "Qty", "price": "Price", "rev": "Revenue", "flag": "Flagged On"}
+    for ci, c in enumerate(cols, 1):
+        s3.hdr(ws, 3, ci, hdrs_map.get(c, c))
+    for i, r in df.reset_index(drop=True).iterrows():
+        row = i + 4
+        # Every flagged row gets a pink background — it's already an exception
+        for ci, c in enumerate(cols, 1):
+            v = r.get(c, "")
+            fmt = "#,##0" if c in ["prqty", "price", "rev"] else None
+            s3.cel(ws, row, ci, v, fmt=fmt, bg="FFE4E1",
+                   align="left" if c in ["cusnm", "prdnm", "flag", "salno", "cusno", "prdno"] else "right")
+    s3.border(ws, 3, 3 + len(df), 1, len(cols))
+    s3.widths(ws, {get_column_letter(i): 14 for i in range(1, len(cols) + 1)})
+
+
+def sheet_basket(wb, sale_full, s3):
+    """Top product pairs by lift — the cross-sell candidate list."""
+    ws = wb.create_sheet("Market Basket")
+    s3.page_title(ws, "Market Basket Analysis (Top Pairs by Lift)", 6)
+
+    df = market_basket_analysis(sale_full)
+    if df.empty:
+        ws["A2"] = "Not enough repeat pairs to compute lift"; return
+
+    for ci, h in enumerate(["Rank", "Product A", "Name A", "Product B", "Name B", "Co-Count", "Lift"], 1):
+        s3.hdr(ws, 3, ci, h)
+    for i, r in df.iterrows():
+        row = i + 4
+        bg = s3.GRAY if i % 2 == 0 else s3.WHITE
+        # Highlight strong associations (lift > 1.5) in green — these are the
+        # most actionable cross-sell recommendations for marketing/bundle teams
+        lift_val = float(r["lift"])
+        lift_bg = "C6EFCE" if lift_val > 1.5 else bg
+        s3.cel(ws, row, 1, i + 1,             align="center", bg=bg)
+        s3.cel(ws, row, 2, r["prdno_a"],      align="center", bg=bg)
+        s3.cel(ws, row, 3, r["name_a"],       align="left",   bg=bg)
+        s3.cel(ws, row, 4, r["prdno_b"],      align="center", bg=bg)
+        s3.cel(ws, row, 5, r["name_b"],       align="left",   bg=bg)
+        s3.cel(ws, row, 6, int(r["count"]),   "#,##0",        bg=bg)
+        s3.cel(ws, row, 7, round(lift_val, 2), "0.00",         bg=lift_bg)
+    s3.border(ws, 3, 3 + len(df), 1, 7)
+    s3.widths(ws, {"A": 6, "B": 12, "C": 24, "D": 12, "E": 24, "F": 10, "G": 10})
+
+
+def sheet_forecast(wb, monthly, s3):
+    """Historical sales + projected next-N months with clear visual separation."""
+    ws = wb.create_sheet("Sales Forecast")
+    s3.page_title(ws, "Sales Forecast (Exponential Smoothing + Seasonal)", 4)
+
+    df = sales_forecast(monthly, horizon=3)
+    if df.empty:
+        ws["A2"] = "Need at least 6 months of data to forecast"; return
+
+    for ci, h in enumerate(["Month", "Sales", "Type"], 1):
+        s3.hdr(ws, 3, ci, h)
+    for i, r in df.reset_index(drop=True).iterrows():
+        row = i + 4
+        # Forecast rows visually distinct (light orange) from historical (gray/white)
+        is_forecast = r["type"] == "forecast"
+        bg = "FFE4B5" if is_forecast else (s3.GRAY if i % 2 == 0 else s3.WHITE)
+        s3.cel(ws, row, 1, r["ym"],                    align="center", bg=bg)
+        s3.cel(ws, row, 2, round(float(r["sales"]), 0), "#,##0",        bg=bg)
+        s3.cel(ws, row, 3, r["type"],                   align="center", bg=bg)
+    s3.border(ws, 3, 3 + len(df), 1, 3)
+
+    # Line chart of full series — the eye catches the forecast tail immediately
+    n = len(df)
+    chart = LineChart()
+    chart.title = "Historical + Forecast"
+    chart.height = 10; chart.width = 20
+    data_ref = Reference(ws, min_col=2, max_col=2, min_row=3, max_row=3 + n)
+    chart.add_data(data_ref, titles_from_data=True)
+    cats = Reference(ws, min_col=1, min_row=4, max_row=3 + n)
+    chart.set_categories(cats)
+    ws.add_chart(chart, "F3")
+    s3.widths(ws, {"A": 12, "B": 14, "C": 12})
+
+
+def sheet_churn(wb, cust_agg, s3):
+    """Customer list sorted by churn probability with risk flag."""
+    ws = wb.create_sheet("Churn Risk")
+    s3.page_title(ws, "Customer Churn Risk Scoring", 7)
+
+    df = churn_risk_scoring(cust_agg)
+    if df.empty:
+        ws["A2"] = "Need >=20 customers with varied R_days to train churn model"; return
+
+    cols = list(df.columns)
+    hdrs_map = {"cusno": "Cust ID", "cusnm": "Customer", "order_count": "Orders",
+                "sales": "Sales", "R_days": "Days Since Last",
+                "churn_prob": "Churn Prob", "churn_flag": "Risk"}
+    for ci, c in enumerate(cols, 1):
+        s3.hdr(ws, 3, ci, hdrs_map.get(c, c))
+    for i, r in df.iterrows():
+        row = i + 4
+        # High risk rows get red-ish background; low risk stays neutral.
+        # Makes the top of the sheet unmistakably actionable.
+        is_high = r.get("churn_flag", "") == "High Risk"
+        bg = "FFC7CE" if is_high else (s3.GRAY if i % 2 == 0 else s3.WHITE)
+        for ci, c in enumerate(cols, 1):
+            v = r.get(c, "")
+            if c == "churn_prob":
+                s3.cel(ws, row, ci, round(float(v), 3), "0.0%", bg=bg)
+            elif c in ["order_count", "sales", "R_days"]:
+                s3.cel(ws, row, ci, v, "#,##0", bg=bg)
+            else:
+                align = "left" if c in ["cusnm", "churn_flag"] else "center"
+                s3.cel(ws, row, ci, v, align=align, bg=bg)
+    s3.border(ws, 3, 3 + len(df), 1, len(cols))
+    s3.widths(ws, {"A": 12, "B": 24, "C": 10, "D": 14, "E": 14, "F": 12, "G": 12})
+
+
+# ══════════════════════════════════════════════════════════
+# MAIN
+# ══════════════════════════════════════════════════════════
+
+def main():
+    if len(sys.argv) > 1:
+        folder = sys.argv[1]
+    else:
+        folder = input("Enter path to aggregated folder (step2 output):\n> ").strip()
+
+    src = Path(folder)
+    if not src.exists():
+        print(f"Folder not found: {folder}")
+        input("Press Enter to exit..."); return
+
+    out_path = src.parent / "advanced_analysis_report.xlsx"
+    print(f"\nSource: {src}")
+    print(f"Output: {out_path}\n{'='*50}")
+
+    # Load inputs: some analyses use the aggregate tables, others need the
+    # line-level sale_full (which has salno + prdno + prdnm for basket analysis).
+    monthly   = load(src, "monthly.csv")
+    cust_agg  = load(src, "cust_agg.csv")
+    sale_full = load(src, "sale_full.csv")
+
+    print("Loading report styling from step3_analyze.py...")
+    try:
+        s3 = _import_step3()
+    except Exception as e:
+        print(f"Failed to load step3: {e}")
+        input("Press Enter to exit..."); return
+
+    print("Building advanced report...")
+    wb = Workbook()
+    wb.remove(wb.active)
+
+    # Order chosen so the executive-friendly sheets come first,
+    # deep-dive tables last.
+    sheet_forecast(wb, monthly, s3)       # What's next?
+    sheet_seasonality(wb, monthly, s3)     # Why did this month dip?
+    sheet_cohort(wb, sale_full, s3)        # Are we keeping customers?
+    sheet_churn(wb, cust_agg, s3)          # Who's about to leave?
+    sheet_basket(wb, sale_full, s3)        # What should we bundle?
+    sheet_anomaly(wb, sale_full, s3)       # What looks wrong?
+
+    wb.save(out_path)
+    print(f"\nAdvanced report complete: {out_path}")
+    print("\nSheets:")
+    for ws in wb.worksheets:
+        print(f"   {ws.title}")
+    input("\nPress Enter to exit...")
+
+
+if __name__ == "__main__":
+    main()
