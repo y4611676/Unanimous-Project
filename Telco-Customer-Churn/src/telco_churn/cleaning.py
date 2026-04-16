@@ -1,4 +1,4 @@
-"""Telco Churn 資料集清理邏輯（與 notebook 共用，便於測試與重現）。"""
+"""Telco Churn dataset cleaning logic (shared with the notebook so it's testable and reproducible)."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def clean_telco_churn(df_in: pd.DataFrame) -> pd.DataFrame:
-    """Telco Churn CSV 的標準清理流程；回傳新 DataFrame。"""
+    """Standard cleaning pipeline for the Telco Churn CSV; returns a new DataFrame."""
     out = df_in.copy()
     n0 = len(out)
 
@@ -38,5 +38,5 @@ def clean_telco_churn(df_in: pd.DataFrame) -> pd.DataFrame:
         pd.to_numeric(out["SeniorCitizen"], errors="coerce").fillna(0).astype(int).clip(0, 1)
     )
 
-    print(f"清理前列數: {n0} → 清理後: {len(out)}（剔除重複 ID: {n_dup}）")
+    print(f"rows before cleaning: {n0}  →  after: {len(out)}  (dropped duplicate IDs: {n_dup})")
     return out

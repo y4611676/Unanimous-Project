@@ -1,120 +1,123 @@
-# Pipeline Template — 通用化 ETL 管線
+# Pipeline Template — Generic ETL Engine
 
-一套設定驅動（config-driven）的四階段 ETL 模板：
+A config-driven four-stage ETL template:
 
 ```
-clean  →  aggregate  →  analyze  →  anonymize
+clean  →  aggregate  →  analyze  →  anonymize  →  Excel report
 ```
 
-**動機**：倉庫內 `work/` 下的四支程式（`step1_clean.py` → `step4_anonymize.py`）是一條完整可用的管線，但檔名、欄位、業務邏輯全寫死在程式碼裡，換一份資料就得改 60-70% 的程式碼。
+**Motivation**: the four scripts under `work/` (`step1_clean.py` → `step4_anonymize.py`) are a complete, working pipeline — but file names, column names, and business logic are all hard-coded in Python. Swapping in a different dataset would require rewriting 60–70% of the code.
 
-這個模板把每一階段需要「知道的事情」全部抽到一個 YAML config，程式碼本身完全不綁定任何欄位名。
+This template pulls everything each stage needs to *know* out into a YAML config. The Python code itself is no longer bound to any specific field name.
 
 ---
 
-## 快速開始
+## Quick start
 
 ```bash
-pip install -r ../requirements.txt        # 需要 pandas / numpy / pyyaml / openpyxl
-cp config.example.yaml my_config.yaml     # 複製並改成你的欄位
+pip install -r ../requirements.txt        # needs pandas / numpy / pyyaml / openpyxl
+cp config.example.yaml my_config.yaml     # copy and edit to match your columns
 python run_pipeline.py my_config.yaml
 ```
 
-輸出會進到 `my_config.yaml` 的 `paths.out_dir` 裡，分成四個子資料夾：
+Output lands under the `paths.out_dir` defined in your config, split into four subfolders:
 
 ```
 out/
-├── cleaned/       # step 1 輸出（與原始 CSV 同名，已清洗）
-├── aggregated/    # step 2 輸出（每個 aggregation 一個 CSV）
-├── analyzed/      # step 3 輸出（RFM、Pareto、Top-N）
-└── anonymized/    # step 4 輸出（與 cleaned/aggregated 對應，但已去識別化）
+├── cleaned/       # stage 1 output (same filenames as raw CSVs, but cleaned)
+├── aggregated/    # stage 2 output (one CSV per aggregation)
+├── analyzed/      # stage 3 output (RFM, Pareto, Top-N)
+└── anonymized/    # stage 4 output (mirrors cleaned/aggregated with masking applied)
 ```
 
 ---
 
-## 只跑部分階段
+## Running individual stages
 
 ```bash
 python run_pipeline.py my_config.yaml --only clean,aggregate
-python run_pipeline.py my_config.yaml --only analyze   # 從 cleaned/ 讀取
+python run_pipeline.py my_config.yaml --only analyze   # reads from cleaned/
 ```
 
-`--src` 和 `--out` 可以在 CLI 覆蓋 config 裡的路徑。
+`--src` and `--out` override the paths in the config from the CLI.
 
 ---
 
-## Config Schema 速查
+## Config schema — quick reference
 
-| 區塊 | 目的 | 必填 |
+| Section | Purpose | Required |
 |---|---|---|
-| `paths.raw_dir` / `paths.out_dir` | 資料夾位置 | 其一，否則用 CLI `--src/--out` |
-| `sources[]` | 要清洗的 CSV + 欄位規則 | clean 階段必填 |
-| `aggregations[]` | groupby 定義 | aggregate 階段必填 |
-| `analysis.rfm` / `analysis.pareto` / `analysis.top_n` | 分析設定 | 可選 |
-| `anonymization` | 去識別化設定 | 可選 |
+| `paths.raw_dir` / `paths.out_dir` | Input / output folders | One or the other, unless `--src`/`--out` is passed |
+| `sources[]` | CSV files + per-column cleaning rules | Required for the `clean` stage |
+| `aggregations[]` | Groupby definitions | Required for the `aggregate` stage |
+| `analysis.rfm` / `analysis.pareto` / `analysis.top_n` | Analysis settings | Optional |
+| `anonymization` | De-identification rules | Optional |
 
-詳細欄位請看 [`config.example.yaml`](./config.example.yaml) 的註解。
+See [`config.example.yaml`](./config.example.yaml) for a fully-commented walkthrough.
 
 ---
 
-## 實際案例
+## Real-world examples
 
-這個 repo 附了兩個實際情境的 config，**兩個都用同一套引擎**，只靠 YAML 不同就能跑出不同領域的報表：
+The repo ships two example configs — **the same engine drives both**, only the YAML differs:
 
-### `examples/sales_report/` — 商業分析報表
-用 YAML 描述原本 `work/step1`~`step4` 裡寫死的全部 9 個 CSV、30+ 欄位、毛利計算、RFM、Pareto、去識別化規則，外加 Excel 輸出（7 張工作表）。
+### `examples/sales_report/` — Business analytics report
+A YAML description of every CSV, column, gross-margin calculation, RFM, Pareto, and de-identification rule that was hard-coded in `work/step1`–`step4`, plus a 7-sheet Excel export.
 
 ```bash
 cd examples/sales_report
 python ../../run_pipeline.py config.yaml --src /path/to/raw_csvs
 ```
 
-### `examples/telco_churn/` — 電信客戶流失分析
-用同一套引擎跑 IBM Telco Customer Churn 資料集，產生流失率分段（Contract / Payment / Internet）、高價值客戶 80/20、風險客戶 Top 50 的完整 Excel 報表。
+### `examples/telco_churn/` — Telecom customer churn
+The same engine run against the IBM Telco Customer Churn dataset, producing churn-rate segmentation (Contract / Payment / Internet), a high-value-customer 80/20 Pareto, and a top-50 at-risk spenders list — delivered as a formatted Excel workbook.
 
 ```bash
 cd examples/telco_churn
-# 把 Telco-Customer-Churn.csv 放在同資料夾後
+# drop Telco-Customer-Churn.csv next to config.yaml, then:
 python ../../run_pipeline.py config.yaml
 ```
 
-這兩個 schema 完全不同（銷售 vs 電信），但跑的是同一條 pipeline 程式碼——這就是「通用化」的證明。
+The two schemas are entirely different (retail sales vs. telecom), yet the same pipeline code runs on both — which is the proof that the abstraction is genuinely generic.
 
 ---
 
-## 設計原則
+## Design principles
 
-1. **程式不知道你的欄位叫什麼**：所有欄位名透過 config 注入，程式碼只操作「有幾欄」「怎麼 group」「哪些是金額」這類抽象概念
-2. **缺資料不崩潰**：missing CSV、missing column、missing metric 都會 warn 後略過，和 `work/step1` 原本的 `if not df.empty` 防禦一致
-3. **階段可獨立執行**：每階段讀前階段的 CSV，不需要一次跑完整條管線
-4. **去識別化是可選的**：不要的話整段 `anonymization:` 拿掉就不會跑
+1. **The code doesn't know what your columns are called** — every field name is injected via config. The engine only operates on abstractions like "how many columns", "what to group by", "which columns are monetary"
+2. **Missing data doesn't crash the pipeline** — missing CSV, missing column, missing metric all generate a warning and are skipped, matching the `if not df.empty` defensive style in the original `work/step1`
+3. **Stages run independently** — each stage reads the previous stage's CSVs, so you don't need to run the whole pipeline end-to-end
+4. **De-identification is opt-in** — remove the `anonymization:` block from the config and the stage is skipped entirely
 
 ---
 
-## 目錄結構
+## Folder structure
 
 ```
 pipeline_template/
-├── README.md                  # 你正在看的這份
-├── config.example.yaml        # 空白起步範本
-├── run_pipeline.py            # 進入點
+├── README.md                  # this file
+├── config.example.yaml        # blank-slate starter template
+├── run_pipeline.py            # CLI entry point
 ├── pipeline/
 │   ├── __init__.py
 │   ├── io_utils.py            # load_csv / save_csv / log / resolve_folder
-│   ├── cleaning.py            # run_cleaning  — clean 階段
-│   ├── aggregation.py         # run_aggregation — aggregate 階段
+│   ├── cleaning.py            # run_cleaning — clean stage
+│   ├── aggregation.py         # run_aggregation — aggregate stage
 │   ├── analysis.py            # run_analysis — RFM / Pareto / Top-N
-│   └── anonymization.py       # anonymize_tables — 去識別化
+│   ├── anonymization.py       # anonymize_tables — de-identification
+│   └── excel_writer.py        # optional formatted xlsx report
 └── examples/
-    └── sales_report/
-        └── config.yaml        # 重現 work/ 情境的完整 config
+    ├── sales_report/
+    │   └── config.yaml        # reproduces the full work/ scenario via config
+    └── telco_churn/
+        └── config.yaml        # same engine on IBM Telco Churn dataset
 ```
 
 ---
 
-## Excel 輸出
+## Excel output
 
-Config 裡加一段 `output.excel` 就會產出格式化的 xlsx 報表（表頭配色、邊框、凍結列、欄寬自動調整、金額/百分比格式化）：
+Adding an `output.excel` block to the config produces a fully formatted xlsx report (coloured headers, borders, frozen panes, auto-sized columns, currency / percent formatting):
 
 ```yaml
 output:
@@ -123,14 +126,14 @@ output:
     filename: report.xlsx
     source: aggregated
     sheets:
-      - {from: monthly, title: 月度營收, number_cols: [revenue]}
-      - {from: rfm, stage: analyzed, title: RFM 分數}
-      - {from: customer_agg, title: 客戶排行, percent_cols: [share, cum_share]}
+      - {from: monthly, title: Monthly Revenue, number_cols: [revenue]}
+      - {from: rfm, stage: analyzed, title: RFM Scores}
+      - {from: customer_agg, title: Customer Ranking, percent_cols: [share, cum_share]}
 ```
 
-每張工作表的 `from` 指向某個階段產出的表名；`stage` 預設用 `source`，也可以逐表覆蓋（例如分析結果在 `analyzed/`）。
+Each sheet's `from` points to a table produced by one of the pipeline stages. `stage` defaults to the top-level `source` but can be overridden per-sheet (e.g. analysis outputs live under `analyzed/`).
 
-## 測試
+## Tests
 
 ```bash
 cd pipeline_template
@@ -138,10 +141,10 @@ pip install pytest
 pytest tests/ -v
 ```
 
-附了 5 支測試檔共約 20 個 case，涵蓋：清洗、聚合（含 YAML `on:` → `True` 的 quirk）、RFM/Pareto/Top-N、去識別化的確定性與跨表一致性、Excel 輸出。
+Five test files, ~20 cases covering: cleaning, aggregation (including the YAML 1.1 `on:` → `True` quirk), RFM / Pareto / Top-N, de-identification determinism and cross-table consistency, and Excel output.
 
-## 延伸方向
+## Possible extensions
 
-- 其他情境的 config 可加到 `examples/`（如 `examples/bike_share/`），把整個 repo 變成「多情境模板庫」
-- Excel 輸出若要加圖表（`BarChart` / `LineChart`），`openpyxl.chart` 已經可用，在 `excel_writer.py` 的 `_write_sheet` 後綴加幾行即可
-- 若資料量大到 pandas 吃不動，`io_utils.load_csv` 可改用 `duckdb`（requirements.txt 已含）並維持同樣介面
+- Additional example configs under `examples/` (e.g. `examples/bike_share/`) to turn the repo into a multi-scenario template library
+- Add charts (`BarChart` / `LineChart`) to the Excel output — `openpyxl.chart` is already available; hook them into `excel_writer.py`'s `_write_sheet`
+- Swap `io_utils.load_csv` for a DuckDB-backed loader (already listed in `requirements.txt`) if data volume outgrows pandas — the interface stays the same

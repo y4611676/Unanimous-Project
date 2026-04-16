@@ -67,6 +67,6 @@ def resolve_folder(arg: str | None, prompt: str) -> Path:
 def report_cleaning(name: str, n_before: int, n_after: int, issues: Iterable[str]) -> None:
     """Pretty-print cleaning stats (generalised from work/step1_clean.py:35-39)."""
     log(f"\n【{name}】")
-    log(f"  原始筆數：{n_before}　清理後：{n_after}")
+    log(f"  rows in: {n_before}  →  rows out: {n_after}")
     for msg in issues:
         log(f"  {msg}", level="warn")

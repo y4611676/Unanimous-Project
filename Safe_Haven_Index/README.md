@@ -1,100 +1,100 @@
 # 🌍 Safe Haven Index
 
-> 你認為「避風港」應該長什麼樣？拉動權重，答案就變了。
+> What does a "safe haven" mean to *you*? Drag the weights and the answer changes.
 
-互動式儀表板，用六項全球指標排名「哪些國家最適合當避風港」。權重是**你**決定的——政治穩定度重要還是能源自給重要、英語普及率重要還是離衝突多遠重要，滑桿拉一拉就看到排名怎麼翻轉。
+Interactive Streamlit dashboard that ranks 61 countries on six global indicators — political stability, energy self-sufficiency, healthcare quality, immigration friendliness, English prevalence, and distance from active conflict hotspots. **You** decide the weights: move the sidebar sliders to see how the ranking reshapes around your priorities.
 
-## Key Findings（預設等權重）
+## Key Findings (equal-weight defaults)
 
-- **Top 5**：Australia、Canada、New Zealand、Norway、Ireland — 共同特徵是政治穩定度高 + 英語國家 + 地理遠離衝突熱點
-- **任何 preset 下 Australia 都穩拿第 1**：六項指標全部 ≥65 分，沒有明顯弱點（結構性安全，不是靠單一強項拉分）
-- **Singapore / UAE 的排名高度依賴權重**：兩國因英語普及（SG）或移民友善（UAE）局部強勢，但在 security-focused preset 下就掉出前 10
-- **底部集中在南亞 + 活躍衝突區**：Ukraine (24.9)、Pakistan (36.5)、Egypt (44.3)、Bangladesh (45.3)、Nigeria (47.2)
-- **Norway 在 security-focused preset 躍升至 #2**（原本 #4）——能源 100% 自給 + 政治穩定度前段，只是移民友善度普通被等權重稀釋
+- **Top 5**: Australia, Canada, New Zealand, Norway, Ireland — all combine high political stability, English fluency, and geographic distance from conflict zones
+- **Australia stays #1 under every preset** — all six indicator scores ≥65, no weak dimension (structurally safe rather than relying on a single strength)
+- **Singapore / UAE ranks are weight-sensitive**: strong on English (SG) or immigration (UAE) but drop out of the top 10 under the security-focused preset
+- **Bottom concentrated in South Asia + active conflict zones**: Ukraine (24.9), Pakistan (36.5), Egypt (44.3), Bangladesh (45.3), Nigeria (47.2)
+- **Norway jumps to #2 under the security-focused preset** (from #4 at equal weights) — 100% energy self-sufficient plus top-tier stability, just held back on immigration when everything is equally weighted
 
-*(數字為 61 個主要國家，World Bank 2022–2023 年資料 + EF English Proficiency Index)*
+*(61 major countries, World Bank 2022–2023 data + EF English Proficiency Index)*
 
-## 螢幕截圖
+## Screenshots
 
-> 執行 `streamlit run app.py` 後在瀏覽器打開 http://localhost:8501
+> Run `streamlit run app.py` and open http://localhost:8501
 
-- **Rankings tab**：排名表 + Red-Yellow-Green 熱度底色
-- **Map tab**：Plotly choropleth 世界地圖
-- **Indicator profile tab**：任選一國看六維雷達圖
-- **Sidebar**：六個權重滑桿 + 4 個 preset（Equal / Security / Lifestyle / Economic）
+- **Rankings tab**: sortable table with red-yellow-green heat map overlay
+- **Map tab**: Plotly choropleth world map coloured by composite score
+- **Indicator profile tab**: polar / radar chart for any single country across all six dimensions
+- **Sidebar**: six weight sliders + 4 presets (Equal / Security / Lifestyle / Economic)
 
-## 快速開始
+## Quick start
 
 ```bash
 pip install -r requirements.txt
-python build_index.py          # 用內建 snapshot 算一次排名
-streamlit run app.py           # 啟動互動儀表板
+python build_index.py          # compute the ranking from the shipped snapshot
+streamlit run app.py           # launch the interactive dashboard
 ```
 
-想用最新 World Bank 資料：
+Refresh from the live World Bank API:
 
 ```bash
-python build_index.py --live   # 打 WB API，更新到 data/raw/
+python build_index.py --live   # hits the WB API, caches to data/raw/
 ```
 
-（離線也能跑，`build_index.py` 不給 `--live` 就用 `data/snapshot/countries.csv`，這份是 repo 內建的。）
+The offline snapshot at `data/snapshot/countries.csv` is shipped in the repo, so `streamlit run app.py` works out of the box — no API key, no network required.
 
-## 六項指標與資料來源
+## The six indicators
 
-| 指標 | 中文 | 資料來源 | 原始單位 | 標準化 |
-|---|---|---|---|---|
-| `political_stability` | 政治穩定度 | World Bank `PV.EST`（WGI）| -2.5 .. +2.5 | clip 到理論區間後線性縮放到 0–100 |
-| `energy_self_sufficiency` | 能源自給率 | 由 WB `EG.IMP.CONS.ZS` 推導 | % 進口 | `100 - imports%`，負值（淨出口）保留 |
-| `healthcare_quality` | 醫療品質 | WB `SP.DYN.LE00.IN` + `SH.XPD.CHEX.PC.CD` | 歲 × USD | 70% 壽命 + 30% log(人均支出) |
-| `immigration_friendliness` | 移民友善度 | 淨移民率（/千人）| rate | 線性縮放（-10..+15 合理區間）|
-| `english_prevalence` | 英語普及率 | EF EPI + 英語原生/官方旗標 | 30–100 | 直接縮放 |
-| `conflict_distance` | 距離衝突熱點 | 首都到 14 個熱點的 haversine 最小距離 | km | log(1+km) 避免遠距差異過度壓縮排名 |
+| Indicator | Source | Raw unit | Normalisation |
+|---|---|---|---|
+| `political_stability` | World Bank `PV.EST` (WGI) | -2.5 .. +2.5 | Clip to theoretical range, linear scale to 0–100 |
+| `energy_self_sufficiency` | Derived from WB `EG.IMP.CONS.ZS` | % imports | `100 - imports%`, negative values (net exporters) preserved |
+| `healthcare_quality` | WB `SP.DYN.LE00.IN` + `SH.XPD.CHEX.PC.CD` | years × USD | 70% life expectancy + 30% log(spend per capita) |
+| `immigration_friendliness` | Net migration rate (per 1,000) | rate | Linear scale over a -10..+15 plausible band |
+| `english_prevalence` | EF EPI + native/official language flag | 30–100 | Direct scale |
+| `conflict_distance` | Haversine from capital to 14 hotspots (minimum) | km | `log(1 + km)` so "very far" vs. "extremely far" doesn't dominate |
 
-衝突熱點清單（`data/reference/conflict_zones.csv`，可自行編輯）：
-烏克蘭、加薩、敘利亞、葉門、蘇丹、緬甸、海地、索馬利亞、阿富汗、台海、南海、朝鮮半島、喀什米爾、衣索比亞提格雷。
+Conflict hotspots list (`data/reference/conflict_zones.csv`, editable):
+Ukraine, Gaza, Syria, Yemen, Sudan, Myanmar, Haiti, Somalia, Afghanistan, Taiwan Strait, South China Sea, Korean DMZ, Kashmir, Ethiopia/Tigray.
 
-## 合成分數怎麼算
+## How the composite score is computed
 
 ```
 normalised_weight_i = max(0, w_i) / Σ max(0, w_j)
-safe_haven_score = Σ normalised_weight_i × indicator_score_i
+safe_haven_score    = Σ normalised_weight_i × indicator_score_i
 ```
 
-缺值用**全域中位數**插補，但 `data_completeness` 欄會顯示該國六項中有幾項是真的觀察到的，不是插出來的。
+Missing values are imputed with the **global median** of that indicator, but the `data_completeness` column makes this transparent — it shows how many of the six indicators were actually observed for each row.
 
-## 資料夾結構
+## Folder structure
 
 ```
 Safe_Haven_Index/
 ├── README.md
 ├── requirements.txt
-├── build_index.py              # CLI：計算所有指標 + 預設排名
-├── app.py                      # Streamlit 儀表板
+├── build_index.py              # CLI: compute indicators + default ranking
+├── app.py                      # Streamlit dashboard
 ├── data/
 │   ├── snapshot/
-│   │   └── countries.csv       # 內建 61 國 snapshot（離線 fallback）
+│   │   └── countries.csv       # Shipped 61-country snapshot (offline fallback)
 │   ├── reference/
-│   │   ├── conflict_zones.csv  # 14 個衝突熱點座標
-│   │   └── english_proficiency.csv  # EF EPI + 英語國家旗標
-│   ├── raw/                    # `--live` 模式會快取 WB API 回傳
-│   └── safe_haven_index.csv    # build_index.py 輸出
+│   │   ├── conflict_zones.csv  # 14 hotspot coordinates
+│   │   └── english_proficiency.csv  # EF EPI + native/official language flag
+│   ├── raw/                    # `--live` mode caches WB API responses here
+│   └── safe_haven_index.csv    # build_index.py output
 └── src/
-    ├── fetch.py                # WB API client + 離線 fallback
-    ├── indicators.py           # 六個指標的計算 + 0-100 標準化
-    └── scoring.py              # 加權合成 + 排名
+    ├── fetch.py                # WB API client + offline fallback
+    ├── indicators.py           # 6 indicators with 0-100 normalisation
+    └── scoring.py              # Weighted composite + ranking
 ```
 
-## 設計取捨（留個紀錄）
+## Design trade-offs
 
-- **為什麼挑這六項？** 題目指定的，但也的確覆蓋了「避風港」討論常見的幾個面向：制度（政治穩定）、自主（能源）、生存（醫療）、融入（英語、移民）、地緣（衝突距離）。
-- **為什麼用 World Bank 為主？** 免費、無金鑰、歷史悠久、多數指標涵蓋 180+ 國。但英語普及和衝突距離 WB 沒有，所以這兩項用第三方資料補。
-- **為什麼內建 snapshot？** 讓人 clone 下來直接 `streamlit run` 就看得到結果，不用先設 API key、不用先等抓資料。想用最新資料再跑 `--live`。
-- **什麼時候這個分數會誤導人？** 當你把權重拉成極端單一項時——比如權重全部壓在英語普及，那菲律賓會跳得很高；但這不代表菲律賓真的是避風港。複合分數的意義就在分散風險，單一維度看排名會失真。
-- **這不是地緣政治預測**。是一個幫助對話的工具，不是決策依據。
+- **Why these six indicators?** They were specified by the brief, and they do cover the standard "safe haven" conversation: institutions (political stability), self-reliance (energy), survival (healthcare), integration (English, immigration), geography (conflict distance).
+- **Why World Bank as the primary source?** Free, key-less, decades of history, and covers 180+ countries for most indicators. English prevalence and conflict distance aren't in WB, so those use third-party reference data shipped in the repo.
+- **Why ship a snapshot?** So anyone cloning the repo can `streamlit run app.py` and immediately see results — no API setup, no download wait. `--live` is there when you want fresh data.
+- **When does this score mislead?** When a user cranks a single weight to the maximum. If you push English prevalence to 5 and zero everything else, the Philippines jumps high — but that doesn't make it a safe haven. The whole point of a composite is diversification; reading a single dimension as the answer defeats the exercise.
+- **This is not a geopolitical forecast.** It's a conversation tool, not a relocation decision.
 
-## 可能的延伸
+## Possible extensions
 
-- 加時間維度（滑 2010 → 2024）看各國分數怎麼變化
-- 加「關切議題」篩選（氣候脆弱度、網路自由度、言論自由指數）
-- 用 `--live` 跑完 WB API 後，補上完整 200+ 國 coverage
-- 把幾個 preset 做成分享連結（query string 帶權重）
+- Add a time dimension (slide 2010 → 2024) to see how each country's score has shifted
+- Add an "issue filter" layer (climate vulnerability, internet freedom, press freedom)
+- Run `--live` once and expand snapshot coverage to all 200+ countries
+- Make presets shareable via query-string URLs (weights encoded in the link)
