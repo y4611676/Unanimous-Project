@@ -82,7 +82,11 @@ def widths(ws, d):
 # ══════════════════════════════════════════════════════════
 
 def rfm_analysis(cust_agg):
-    """RFM customer segmentation"""
+    """RFM customer segmentation — scores each customer on three axes:
+       R (Recency): days since last purchase — lower is better, so scoring is reversed
+       F (Frequency): total order count — higher is better
+       M (Monetary): total spend — higher is better
+    Each axis is split into quartiles (1-4) via pd.qcut; combined into a 3-digit score."""
     if cust_agg.empty: return pd.DataFrame()
     df = cust_agg.copy()
     df["last_transaction"] = pd.to_datetime(df["last_transaction"], errors="coerce")
@@ -91,6 +95,7 @@ def rfm_analysis(cust_agg):
     df["F"] = df["order_count"]
     df["M"] = df["sales"]
 
+    # qcut splits into 4 equal-sized bins; R is reversed (fewer days = better score)
     for col, label in [("R_days","R_score"),("F","F_score"),("M","M_score")]:
         try:
             df[label] = pd.qcut(df[col], q=4, labels=[4,3,2,1] if col=="R_days" else [1,2,3,4], duplicates="drop")
@@ -98,6 +103,13 @@ def rfm_analysis(cust_agg):
             df[label] = 2
     df["RFM_score"] = df["R_score"].astype(str) + df["F_score"].astype(str) + df["M_score"].astype(str)
 
+    # Segment mapping — business meaning:
+    #   High Value: recent + frequent + big spender → protect at all costs
+    #   Loyal: recent + frequent → nurture, upsell opportunities
+    #   Dormant: not recent but was frequent → win-back campaigns
+    #   Big Spender: recent + high spend but infrequent → encourage repeat
+    #   At Risk: not recent + infrequent → about to churn, act fast
+    #   Regular: everyone else → standard engagement
     def segment(row):
         r,f,m = int(str(row["R_score"])), int(str(row["F_score"])), int(str(row["M_score"]))
         if r >= 3 and f >= 3 and m >= 3: return "High Value"
@@ -111,7 +123,9 @@ def rfm_analysis(cust_agg):
     return df
 
 def pareto_analysis(df, value_col, name_col):
-    """Pareto 80/20 analysis"""
+    """Pareto 80/20 analysis — ranks items by value_col descending, computes
+    cumulative share, and tags each as 'Top 80%' or 'Bottom 20%'.
+    In most businesses, ~20% of customers/products drive ~80% of revenue."""
     df = df.sort_values(value_col, ascending=False).copy()
     total = df[value_col].sum()
     df["share"] = df[value_col] / total
@@ -124,6 +138,7 @@ def pareto_analysis(df, value_col, name_col):
 # ══════════════════════════════════════════════════════════
 
 def sheet_summary(wb, monthly, cust_agg, prod_agg, stock_agg):
+    # Executive dashboard: 6 KPI cards + monthly trend table
     ws = wb.create_sheet("Business Summary")
     page_title(ws, "Business Summary", 8)
 
@@ -187,6 +202,7 @@ def sheet_summary(wb, monthly, cust_agg, prod_agg, stock_agg):
 
 
 def sheet_rfm(wb, rfm_df):
+    # RFM segmentation results: group stats + full customer detail sorted by sales
     ws = wb.create_sheet("Customer RFM")
     page_title(ws, "Customer RFM Segmentation", 9)
     if rfm_df.empty:
@@ -236,6 +252,7 @@ def sheet_rfm(wb, rfm_df):
 
 
 def sheet_pareto(wb, prod_agg, cust_agg):
+    # 80/20 analysis for products and customers: who/what drives most revenue?
     ws = wb.create_sheet("Pareto Analysis")
     page_title(ws, "Pareto 80/20 Analysis", 8)
 
@@ -287,6 +304,7 @@ def sheet_pareto(wb, prod_agg, cust_agg):
 
 
 def sheet_inventory_alert(wb, stock_agg):
+    # Inventory risk view: status distribution + full detail with low-stock items highlighted
     ws = wb.create_sheet("Inventory Alert")
     page_title(ws, "Inventory Alert Analysis", 8)
     if stock_agg.empty:
@@ -329,6 +347,7 @@ def sheet_inventory_alert(wb, stock_agg):
 
 
 def sheet_gross_margin(wb, prod_agg):
+    # Margin analysis: GP tier distribution + actionable suggestions + detail tables
     ws = wb.create_sheet("Gross Margin")
     page_title(ws, "Product Gross Margin Analysis", 8)
     if prod_agg.empty:
@@ -347,12 +366,13 @@ def sheet_gross_margin(wb, prod_agg):
     for ci, h in enumerate(["GP Tier","Items","Sales Share","Suggestion"], 1):
         hdr(ws, 3, ci, h)
     total_sale = df["sales"].sum()
+    # Business action for each GP tier — drives the "Suggestion" column in the report
     suggestions = {
-        "Loss(<0%)":    "Review pricing or discontinue",
-        "Low(0-10%)":   "Consider price increase or cost reduction",
-        "Mid(10-20%)":  "Monitor",
-        "Good(20-30%)": "Maintain",
-        "High(>30%)":   "Promote",
+        "Loss(<0%)":    "Review pricing or discontinue",   # selling below cost
+        "Low(0-10%)":   "Consider price increase or cost reduction",  # barely profitable
+        "Mid(10-20%)":  "Monitor",                         # acceptable but thin
+        "Good(20-30%)": "Maintain",                        # healthy margin
+        "High(>30%)":   "Promote",                         # high margin = push volume
     }
     for i, r in dist.iterrows():
         row = i + 4

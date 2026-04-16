@@ -28,8 +28,10 @@ ANON_SEED = 20240101
 
 _rng = np.random.default_rng(ANON_SEED)
 
-# Money scale factor: guaranteed >=40% deviation (avoids 0.9~1.1 range)
-# 50% chance shrink to 0.15~0.55; 50% chance expand to 1.5~2.8
+# Money scale factor: two branches to guarantee >=40% deviation from real values.
+# If too close to 1.0, someone could guess the original amounts from the report.
+# Branch 0: shrink to 15-55% of real → values look like a smaller company
+# Branch 1: expand to 150-280% of real → values look like a bigger company
 _side = int(_rng.integers(0, 2))
 MONEY_SCALE = round(
     float(_rng.uniform(0.15, 0.55)) if _side == 0
@@ -37,7 +39,8 @@ MONEY_SCALE = round(
     6
 )
 
-# Date shift: guaranteed 24~72 months (2~6 years), random direction
+# Date shift: 24-72 months (2-6 years) in a random direction.
+# Must be large enough that you can't map back to real calendar events.
 _dir = 1 if int(_rng.integers(0, 2)) == 0 else -1
 DATE_SHIFT_M = _dir * int(_rng.integers(24, 73))
 
@@ -85,10 +88,10 @@ def _make_id_map(series, prefix):
 
 
 def _make_nm_map(id_series, nm_series, label):
-    """
-    Build name→masked_name mapping based on id column order.
-    Names sharing the same id index are masked as 'LabelA / LabelB...'.
-    """
+    """Build name→masked_name mapping based on id column order.
+    Names sharing the same id get the same masked label (e.g. 'Customer A').
+    This ensures consistency: if cusno C001='Acme Corp' appears in multiple tables,
+    it always maps to the same masked name."""
     vals = [str(v).strip() for v in id_series.dropna().unique() if str(v).strip() not in ("", "nan")]
     nm_map = {}
     for i, orig_id in enumerate(vals):
@@ -142,6 +145,8 @@ def build_id_maps(cust_agg, prod_agg, fact_agg):
 # ══════════════════════════════════════════════════════════
 
 def scale_money(df, df_key):
+    # Proportional scaling: multiply all monetary columns by the same factor.
+    # This preserves ratios (e.g. GP rate stays the same) but hides true magnitude.
     df = df.copy()
     for col in MONEY_COLS.get(df_key, []):
         if col in df.columns:
@@ -185,6 +190,9 @@ def _shift_date_col(series):
 
 
 def shift_dates(df, df_key):
+    # Consistent shift: all dates move by the same offset, so relative timeline
+    # (seasonality, gaps, sequences) is perfectly preserved — only the absolute
+    # calendar position changes, preventing re-identification by date matching.
     df = df.copy()
     for col in DATE_COLS.get(df_key, []):
         if col in df.columns:

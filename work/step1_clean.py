@@ -20,12 +20,16 @@ def load(folder, fname):
     df = df.apply(lambda col: col.str.strip() if col.dtype == "object" else col)
     return df
 
+# ── Numeric cleaning strategy: coerce unparseable strings to NaN, then fill with 0
+#    so downstream arithmetic never hits TypeError on mixed-type columns.
 def clean_numeric(df, cols):
     for c in cols:
         if c in df.columns:
             df[c] = pd.to_numeric(df[c], errors="coerce").fillna(0)
     return df
 
+# ── Date cleaning strategy: truncate to first 10 chars (YYYY-MM-DD), coerce
+#    anything unparseable to NaT so invalid dates don't silently corrupt aggregations.
 def clean_date(df, col):
     if col not in df.columns:
         return df
@@ -39,6 +43,7 @@ def report(name, df_before, df_after, issues):
         print(f"  Warning: {msg}")
 
 def main():
+    # ── Overall flow: read raw CSVs → clean each table (types, dates, dedup) → save to cleaned/
     if len(sys.argv) > 1:
         folder = sys.argv[1]
     else:
@@ -50,6 +55,7 @@ def main():
     print(f"Output: {out}\n{'='*50}")
 
     # ── sale.csv ──────────────────────────────────────
+    # Sales order headers: one row per transaction (amounts, dates, customer link)
     df = load(folder, "sale.csv")
     issues = []
     if not df.empty:
@@ -62,11 +68,13 @@ def main():
         if neg: issues.append(f"Negative tot: {neg} rows")
         dup = df.duplicated(subset=["salno"]).sum()
         if dup: issues.append(f"Duplicate salno: {dup} rows (keeping first)")
+        # Keep first occurrence — duplicates are typically re-imports or system glitches
         df = df.drop_duplicates(subset=["salno"], keep="first")
         report("sale.csv", pd.DataFrame(index=range(before)), df, issues)
         df.to_csv(out / "sale.csv", index=False, encoding="utf-8-sig")
 
     # ── sales1.csv ────────────────────────────────────
+    # Sales order line items: product-level detail (qty, price, cost) per sale
     df = load(folder, "sales1.csv")
     issues = []
     if not df.empty:
@@ -83,6 +91,7 @@ def main():
         df.to_csv(out / "sales1.csv", index=False, encoding="utf-8-sig")
 
     # ── purc.csv ──────────────────────────────────────
+    # Purchase order headers: one row per procurement transaction (supplier, amounts)
     df = load(folder, "purc.csv")
     issues = []
     if not df.empty:
@@ -96,6 +105,7 @@ def main():
         df.to_csv(out / "purc.csv", index=False, encoding="utf-8-sig")
 
     # ── purcs1.csv ────────────────────────────────────
+    # Purchase order line items: product-level detail per purchase
     df = load(folder, "purcs1.csv")
     issues = []
     if not df.empty:
@@ -105,6 +115,7 @@ def main():
         df.to_csv(out / "purcs1.csv", index=False, encoding="utf-8-sig")
 
     # ── cust.csv ──────────────────────────────────────
+    # Customer master: one row per customer (ID, name, contact info)
     df = load(folder, "cust.csv")
     issues = []
     if not df.empty:
@@ -118,6 +129,7 @@ def main():
         df.to_csv(out / "cust.csv", index=False, encoding="utf-8-sig")
 
     # ── fact.csv ──────────────────────────────────────
+    # Supplier master: one row per vendor/factory (ID, name)
     df = load(folder, "fact.csv")
     issues = []
     if not df.empty:
@@ -126,6 +138,7 @@ def main():
         df.to_csv(out / "fact.csv", index=False, encoding="utf-8-sig")
 
     # ── prod.csv ──────────────────────────────────────
+    # Product master: catalog of all SKUs (price, cost, safety stock)
     df = load(folder, "prod.csv")
     issues = []
     if not df.empty:
@@ -140,6 +153,7 @@ def main():
         df.to_csv(out / "prod.csv", index=False, encoding="utf-8-sig")
 
     # ── stockqty.csv ──────────────────────────────────
+    # Current inventory snapshot: on-hand quantity per product per warehouse
     df = load(folder, "stockqty.csv")
     if not df.empty:
         df = clean_numeric(df, ["qty"])
@@ -149,6 +163,7 @@ def main():
         df.to_csv(out / "stockqty.csv", index=False, encoding="utf-8-sig")
 
     # ── rereces / repays ──────────────────────────────
+    # Accounts receivable (rereces/rerece) and accounts payable (repays/repay) ledgers
     for fname in ["rereces.csv", "repays.csv", "repay.csv", "rerece.csv"]:
         df = load(folder, fname)
         if not df.empty:
