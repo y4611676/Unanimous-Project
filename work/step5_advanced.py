@@ -309,7 +309,7 @@ def sales_forecast(monthly: pd.DataFrame, horizon: int = 3) -> pd.DataFrame:
 
     df = monthly.sort_values("ym").reset_index(drop=True).copy()
     df["sales"] = pd.to_numeric(df["sales"], errors="coerce").fillna(0)
-    df["type"] = "actual"
+    df["type"] = "實際"
 
     # EWMA trend: alpha=0.3 → recent month = 30% weight, long tail = 70%.
     # This is a reasonable middle ground; increase for more reactive forecasts.
@@ -346,7 +346,7 @@ def sales_forecast(monthly: pd.DataFrame, horizon: int = 3) -> pd.DataFrame:
         forecast_rows.append({
             "ym": str(next_period),
             "sales": max(0.0, projected),  # sales can't go negative
-            "type": "forecast",
+            "type": "預測",
         })
 
     out = pd.concat(
@@ -427,7 +427,7 @@ def churn_risk_scoring(cust_agg: pd.DataFrame) -> pd.DataFrame:
     model.fit(X_scaled, y)
 
     df["churn_prob"] = model.predict_proba(X_scaled)[:, 1]
-    df["churn_flag"] = np.where(df["churn_prob"] >= 0.5, "High Risk", "Low Risk")
+    df["churn_flag"] = np.where(df["churn_prob"] >= 0.5, "高風險", "低風險")
 
     keep = [c for c in ["cusno", "cusnm", "order_count", "sales",
                         "R_days", "churn_prob", "churn_flag"] if c in df.columns]
@@ -453,14 +453,14 @@ def _import_step3():
 
 def sheet_seasonality(wb, monthly, s3):
     """Draw decomposition table + stacked line chart (actual/trend/seasonal)."""
-    ws = wb.create_sheet("Seasonality")
-    s3.page_title(ws, "Seasonality Decomposition", 5)
+    ws = wb.create_sheet("季節性分析")
+    s3.page_title(ws, "季節性分解", 5)
 
     df = seasonality_decomposition(monthly)
     if df.empty:
-        ws["A2"] = "Need at least 13 months of data for decomposition"; return
+        ws["A2"] = "需至少13個月資料才能進行分解"; return
 
-    for ci, h in enumerate(["Month", "Sales", "Trend", "Seasonal", "Residual"], 1):
+    for ci, h in enumerate(["月份", "銷售額", "趨勢", "季節性", "殘差"], 1):
         s3.hdr(ws, 3, ci, h)
     for i, r in df.reset_index(drop=True).iterrows():
         row = i + 4
@@ -475,7 +475,7 @@ def sheet_seasonality(wb, monthly, s3):
     # Line chart: actual vs trend (on-sheet, anchored right of the table)
     n = len(df)
     chart = LineChart()
-    chart.title = "Sales vs Trend"
+    chart.title = "銷售額 vs 趨勢"
     chart.height = 10; chart.width = 20
     data_ref = Reference(ws, min_col=2, max_col=3, min_row=3, max_row=3 + n)
     chart.add_data(data_ref, titles_from_data=True)
@@ -487,16 +487,15 @@ def sheet_seasonality(wb, monthly, s3):
 
 def sheet_cohort(wb, sale_full, s3):
     """Retention matrix: cohort month (rows) × months-since-join (cols)."""
-    ws = wb.create_sheet("Cohort Analysis")
-    s3.page_title(ws, "Customer Cohort Retention", 12)
+    ws = wb.create_sheet("同期群分析")
+    s3.page_title(ws, "客戶同期群留存率", 12)
 
     df = cohort_analysis(sale_full)
     if df.empty:
-        ws["A2"] = "No cohort data (requires sale_full.csv with cusno + sdate)"; return
+        ws["A2"] = "無同期群資料（需 sale_full.csv 含 cusno + sdate）"; return
 
-    # Cap visible columns so the sheet stays readable (first year of retention is usually enough)
     cohort_cols = [c for c in df.columns if c != "cohort_month"][:13]
-    headers = ["Cohort"] + [f"M{c}" for c in cohort_cols]
+    headers = ["加入月份"] + [f"第{c}月" for c in cohort_cols]
     for ci, h in enumerate(headers, 1):
         s3.hdr(ws, 3, ci, h)
 
@@ -521,18 +520,17 @@ def sheet_cohort(wb, sale_full, s3):
 
 def sheet_anomaly(wb, sale_full, s3):
     """List of IQR-flagged sale lines, sorted by which metric tripped the rule."""
-    ws = wb.create_sheet("Anomaly Detection")
-    s3.page_title(ws, "Anomalous Sales Lines (IQR outliers)", 10)
+    ws = wb.create_sheet("異常偵測")
+    s3.page_title(ws, "異常銷售明細（IQR離群值）", 10)
 
     df = anomaly_detection(sale_full)
     if df.empty:
-        ws["A2"] = "No anomalies detected (or insufficient data)"; return
+        ws["A2"] = "未偵測到異常（或資料不足）"; return
 
     cols = list(df.columns)
-    # Friendly headers for known technical columns
-    hdrs_map = {"salno": "Sale ID", "sdate": "Date", "cusno": "Cust ID",
-                "cusnm": "Customer", "prdno": "Prod ID", "prdnm": "Product",
-                "prqty": "Qty", "price": "Price", "rev": "Revenue", "flag": "Flagged On"}
+    hdrs_map = {"salno": "銷售單號", "sdate": "日期", "cusno": "客戶編號",
+                "cusnm": "客戶名稱", "prdno": "產品編號", "prdnm": "產品名稱",
+                "prqty": "數量", "price": "單價", "rev": "金額", "flag": "異常欄位"}
     for ci, c in enumerate(cols, 1):
         s3.hdr(ws, 3, ci, hdrs_map.get(c, c))
     for i, r in df.reset_index(drop=True).iterrows():
@@ -549,14 +547,14 @@ def sheet_anomaly(wb, sale_full, s3):
 
 def sheet_basket(wb, sale_full, s3):
     """Top product pairs by lift — the cross-sell candidate list."""
-    ws = wb.create_sheet("Market Basket")
-    s3.page_title(ws, "Market Basket Analysis (Top Pairs by Lift)", 6)
+    ws = wb.create_sheet("購物籃分析")
+    s3.page_title(ws, "購物籃分析（依關聯度排序）", 6)
 
     df = market_basket_analysis(sale_full)
     if df.empty:
-        ws["A2"] = "Not enough repeat pairs to compute lift"; return
+        ws["A2"] = "重複搭配不足，無法計算關聯度"; return
 
-    for ci, h in enumerate(["Rank", "Product A", "Name A", "Product B", "Name B", "Co-Count", "Lift"], 1):
+    for ci, h in enumerate(["排名", "產品A", "產品A名稱", "產品B", "產品B名稱", "共同出現次數", "關聯度"], 1):
         s3.hdr(ws, 3, ci, h)
     for i, r in df.iterrows():
         row = i + 4
@@ -578,19 +576,18 @@ def sheet_basket(wb, sale_full, s3):
 
 def sheet_forecast(wb, monthly, s3):
     """Historical sales + projected next-N months with clear visual separation."""
-    ws = wb.create_sheet("Sales Forecast")
-    s3.page_title(ws, "Sales Forecast (Exponential Smoothing + Seasonal)", 4)
+    ws = wb.create_sheet("銷售預測")
+    s3.page_title(ws, "銷售預測（指數平滑+季節調整）", 4)
 
     df = sales_forecast(monthly, horizon=3)
     if df.empty:
-        ws["A2"] = "Need at least 6 months of data to forecast"; return
+        ws["A2"] = "需至少6個月資料才能預測"; return
 
-    for ci, h in enumerate(["Month", "Sales", "Type"], 1):
+    for ci, h in enumerate(["月份", "銷售額", "類型"], 1):
         s3.hdr(ws, 3, ci, h)
     for i, r in df.reset_index(drop=True).iterrows():
         row = i + 4
-        # Forecast rows visually distinct (light orange) from historical (gray/white)
-        is_forecast = r["type"] == "forecast"
+        is_forecast = r["type"] == "預測"
         bg = "FFE4B5" if is_forecast else (s3.GRAY if i % 2 == 0 else s3.WHITE)
         s3.cel(ws, row, 1, r["ym"],                    align="center", bg=bg)
         s3.cel(ws, row, 2, round(float(r["sales"]), 0), "#,##0",        bg=bg)
@@ -600,7 +597,7 @@ def sheet_forecast(wb, monthly, s3):
     # Line chart of full series — the eye catches the forecast tail immediately
     n = len(df)
     chart = LineChart()
-    chart.title = "Historical + Forecast"
+    chart.title = "歷史銷售 + 預測"
     chart.height = 10; chart.width = 20
     data_ref = Reference(ws, min_col=2, max_col=2, min_row=3, max_row=3 + n)
     chart.add_data(data_ref, titles_from_data=True)
@@ -612,24 +609,24 @@ def sheet_forecast(wb, monthly, s3):
 
 def sheet_churn(wb, cust_agg, s3):
     """Customer list sorted by churn probability with risk flag."""
-    ws = wb.create_sheet("Churn Risk")
-    s3.page_title(ws, "Customer Churn Risk Scoring", 7)
+    ws = wb.create_sheet("流失風險")
+    s3.page_title(ws, "客戶流失風險評分", 7)
 
     df = churn_risk_scoring(cust_agg)
     if df.empty:
-        ws["A2"] = "Need >=20 customers with varied R_days to train churn model"; return
+        ws["A2"] = "需>=20位客戶且距上次購買天數有差異才能訓練流失模型"; return
 
     cols = list(df.columns)
-    hdrs_map = {"cusno": "Cust ID", "cusnm": "Customer", "order_count": "Orders",
-                "sales": "Sales", "R_days": "Days Since Last",
-                "churn_prob": "Churn Prob", "churn_flag": "Risk"}
+    hdrs_map = {"cusno": "客戶編號", "cusnm": "客戶名稱", "order_count": "訂單數",
+                "sales": "銷售額", "R_days": "距上次購買天數",
+                "churn_prob": "流失機率", "churn_flag": "風險等級"}
     for ci, c in enumerate(cols, 1):
         s3.hdr(ws, 3, ci, hdrs_map.get(c, c))
     for i, r in df.iterrows():
         row = i + 4
         # High risk rows get red-ish background; low risk stays neutral.
         # Makes the top of the sheet unmistakably actionable.
-        is_high = r.get("churn_flag", "") == "High Risk"
+        is_high = r.get("churn_flag", "") == "高風險"
         bg = "FFC7CE" if is_high else (s3.GRAY if i % 2 == 0 else s3.WHITE)
         for ci, c in enumerate(cols, 1):
             v = r.get(c, "")
@@ -652,12 +649,12 @@ def main():
     if len(sys.argv) > 1:
         folder = sys.argv[1]
     else:
-        folder = input("Enter path to aggregated folder (step2 output):\n> ").strip()
+        folder = input("請輸入彙總資料夾路徑 (step2 輸出):\n> ").strip()
 
     src = Path(folder)
     if not src.exists():
-        print(f"Folder not found: {folder}")
-        input("Press Enter to exit..."); return
+        print(f"找不到資料夾: {folder}")
+        input("按 Enter 離開..."); return
 
     out_path = src.parent / "advanced_analysis_report.xlsx"
     print(f"\nSource: {src}")
@@ -669,14 +666,14 @@ def main():
     cust_agg  = load(src, "cust_agg.csv")
     sale_full = load(src, "sale_full.csv")
 
-    print("Loading report styling from step3_analyze.py...")
+    print("載入報表樣式...")
     try:
         s3 = _import_step3()
     except Exception as e:
-        print(f"Failed to load step3: {e}")
-        input("Press Enter to exit..."); return
+        print(f"無法載入 step3: {e}")
+        input("按 Enter 離開..."); return
 
-    print("Building advanced report...")
+    print("建立進階報表中...")
     wb = Workbook()
     wb.remove(wb.active)
 
@@ -690,11 +687,11 @@ def main():
     sheet_anomaly(wb, sale_full, s3)       # What looks wrong?
 
     wb.save(out_path)
-    print(f"\nAdvanced report complete: {out_path}")
-    print("\nSheets:")
+    print(f"\n進階報表完成: {out_path}")
+    print("\n工作表:")
     for ws in wb.worksheets:
         print(f"   {ws.title}")
-    input("\nPress Enter to exit...")
+    input("\n按 Enter 離開...")
 
 
 if __name__ == "__main__":
