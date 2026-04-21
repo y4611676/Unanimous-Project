@@ -7,4 +7,5 @@ pandas>=2.0.0
 numpy>=1.24.0
 openpyxl>=3.1.0
 scikit-learn>=1.3.0
-pywin32>=306        # Windows only — required for automatic Excel→PDF export in step6
+pyyaml>=6.0                                  # Required by pipeline_template/run_pipeline.py
+pywin32>=306; platform_system == "Windows"   # Optional: auto Excel→PDF in step6 (Windows + Excel only)
