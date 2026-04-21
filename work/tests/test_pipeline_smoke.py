@@ -141,7 +141,7 @@ def test_step3_pareto_analysis():
     assert "share" in result.columns
     assert "cumulative_share" in result.columns
     assert "pareto" in result.columns
-    assert result.iloc[0]["pareto"] == "Top 80%"
+    assert result.iloc[0]["pareto"] == "前 80%"
 
 
 # ── step4 ────────────────────────────────────────────────
@@ -167,7 +167,7 @@ def test_step4_id_masking():
 
     masked = _apply(cust, col_maps)
     assert masked["cusno"].iloc[0] == "CUST-001"
-    assert "Customer " in masked["cusnm"].iloc[0]
+    assert "客戶 " in masked["cusnm"].iloc[0]
 
 
 def test_step4_money_scale():
@@ -266,8 +266,8 @@ def test_step5_sales_forecast():
     result = sales_forecast(monthly, horizon=3)
     assert not result.empty
     # Should have historical + 3 forecast rows
-    assert (result["type"] == "forecast").sum() == 3
-    assert (result["type"] == "actual").sum() == 12
+    assert (result["type"] == "預測").sum() == 3
+    assert (result["type"] == "實際").sum() == 12
 
 
 def test_step5_churn_risk():

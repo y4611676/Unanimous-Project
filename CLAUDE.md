@@ -48,21 +48,21 @@ Sample data is available in `work/sample_data/` for testing.
 
 `step5_advanced.py` produces a second Excel report with 6 analyses:
 
-| Sheet | Analysis | Business Question |
+| Sheet (中文) | Analysis | Business Question |
 |-------|----------|-------------------|
-| Sales Forecast | EWMA + seasonal projection (next 3 months) | What's next? |
-| Seasonality | Additive decomposition (trend + seasonal + residual) | Is this dip seasonal or real? |
-| Cohort Analysis | Retention matrix by first-purchase month | Are we keeping customers? |
-| Churn Risk | Logistic regression on RFM features | Who's about to leave? |
-| Market Basket | Product pair lift analysis | What should we bundle? |
-| Anomaly Detection | IQR-based outlier flagging on sale lines | What looks wrong? |
+| 銷售預測 | EWMA + seasonal projection (next 3 months) | What's next? |
+| 季節性分析 | Additive decomposition (trend + seasonal + residual) | Is this dip seasonal or real? |
+| 客戶世代分析 | Retention matrix by first-purchase month | Are we keeping customers? |
+| 流失風險 | Logistic regression on RFM features | Who's about to leave? |
+| 購物籃分析 | Product pair lift analysis | What should we bundle? |
+| 異常偵測 | IQR-based outlier flagging on sale lines | What looks wrong? |
 
 All analyses degrade gracefully on insufficient data (return empty results, don't crash).
 Dependencies: pandas, numpy, openpyxl, scikit-learn (already in requirements.txt).
 
 ### Column Naming Convention
 
-All pipeline steps use English column names:
+Internal DataFrame/CSV column names use English:
 
 | Column | Description |
 |--------|-------------|
@@ -74,7 +74,7 @@ All pipeline steps use English column names:
 | balance | Sales minus purchases |
 | order_count | Number of orders |
 | avg_order_value | Average order value |
-| stock_status | Inventory status (Normal/Low Stock/Zero Stock) |
+| stock_status | Inventory status — cell values in Traditional Chinese: 正常 / 低庫存 / 零庫存 |
 | stock_value | Inventory value |
 | first_transaction / last_transaction | Customer transaction date range |
 | first_purchase / last_purchase | Supplier purchase date range |
@@ -82,5 +82,6 @@ All pipeline steps use English column names:
 ### Code Style
 
 - Python 3.10+
-- Use English for all column names, comments, docstrings, and UI text
+- Code identifiers stay English: variable/function names, internal DataFrame/CSV column names (`sales`, `gross_profit`, `stock_status`, etc.), docstrings, comments, and stdout/log messages in step scripts
 - ID columns keep original short names: cusno, cusnm, prdno, prdnm, facno, facnm
+- Final Excel report text is **Traditional Chinese** (Taiwan business vocabulary) because the reports are delivered to Chinese-speaking clients. This includes: sheet names, page/section titles, column headers shown in cells, chart titles and axis labels, and category label values stored in cells (e.g. RFM segments like `高價值` / `流失邊緣`, `stock_status` values, GP tier labels, churn risk flags `高風險` / `低風險`, forecast `type` values `實際` / `預測`).

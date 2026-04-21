@@ -175,7 +175,7 @@ def main():
         # ideally this would use each product's safeqty instead.
         LOW = 1  # Low stock threshold
         stock_agg["stock_status"] = stock_agg["qty"].apply(
-            lambda q: "Zero Stock" if q <= 0 else ("Low Stock" if q <= LOW else "Normal"))
+            lambda q: "零庫存" if q <= 0 else ("低庫存" if q <= LOW else "正常"))
         if "price" in stock_agg.columns:
             stock_agg["stock_value"] = pd.to_numeric(stock_agg["qty"], errors="coerce") * pd.to_numeric(stock_agg["price"], errors="coerce")
         stock_agg = stock_agg.sort_values("qty")

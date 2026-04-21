@@ -125,17 +125,17 @@ def build_id_maps(cust_agg, prod_agg, fact_agg):
     if not cust_agg.empty and "cusno" in cust_agg.columns:
         col_maps["cusno"] = _make_id_map(cust_agg["cusno"], "CUST")
         if "cusnm" in cust_agg.columns:
-            col_maps["cusnm"] = _make_nm_map(cust_agg["cusno"], cust_agg["cusnm"], "Customer ")
+            col_maps["cusnm"] = _make_nm_map(cust_agg["cusno"], cust_agg["cusnm"], "客戶 ")
 
     if not prod_agg.empty and "prdno" in prod_agg.columns:
         col_maps["prdno"] = _make_id_map(prod_agg["prdno"], "PROD")
         if "prdnm" in prod_agg.columns:
-            col_maps["prdnm"] = _make_nm_map(prod_agg["prdno"], prod_agg["prdnm"], "Product ")
+            col_maps["prdnm"] = _make_nm_map(prod_agg["prdno"], prod_agg["prdnm"], "商品 ")
 
     if not fact_agg.empty and "facno" in fact_agg.columns:
         col_maps["facno"] = _make_id_map(fact_agg["facno"], "SUPP")
         if "facnm" in fact_agg.columns:
-            col_maps["facnm"] = _make_nm_map(fact_agg["facno"], fact_agg["facnm"], "Supplier ")
+            col_maps["facnm"] = _make_nm_map(fact_agg["facno"], fact_agg["facnm"], "供應商 ")
 
     return col_maps
 
@@ -211,16 +211,16 @@ def shift_dates(df, df_key):
 
 def _add_mapping_sheet(wb, col_maps, cust_agg, prod_agg, fact_agg):
     from openpyxl.styles import Font, PatternFill, Alignment
-    ws = wb.create_sheet("Mapping (Confidential)")
+    ws = wb.create_sheet("對照表（機密）")
     ws.sheet_view.showGridLines = False
 
     ws.merge_cells("A1:E1")
     c = ws["A1"]
     c.value = (
-        "De-identification Mapping (Internal Use Only) | "
-        f"Money Scale: {MONEY_SCALE:.4f}  "
-        f"Date Shift: {DATE_SHIFT_M:+d} months  "
-        f"Seed: {ANON_SEED}"
+        "匿名對照（內部使用） | "
+        f"金額縮放：{MONEY_SCALE:.4f}  "
+        f"日期位移：{DATE_SHIFT_M:+d} 個月  "
+        f"Seed：{ANON_SEED}"
     )
     c.font  = Font(name="Arial", bold=True, size=11, color="FFFFFF")
     c.fill  = PatternFill("solid", fgColor="C00000")
@@ -229,9 +229,9 @@ def _add_mapping_sheet(wb, col_maps, cust_agg, prod_agg, fact_agg):
 
     row = 3
     sections = [
-        ("Customer Mapping", "cusno", "cusnm", cust_agg),
-        ("Product Mapping",  "prdno", "prdnm", prod_agg),
-        ("Supplier Mapping", "facno", "facnm", fact_agg),
+        ("客戶對照", "cusno", "cusnm", cust_agg),
+        ("商品對照", "prdno", "prdnm", prod_agg),
+        ("供應商對照", "facno", "facnm", fact_agg),
     ]
 
     for section_title, id_key, nm_key, ref_df in sections:
@@ -239,7 +239,7 @@ def _add_mapping_sheet(wb, col_maps, cust_agg, prod_agg, fact_agg):
             continue
         ws.cell(row=row, column=1, value=section_title).font = Font(bold=True, size=11)
         row += 1
-        for ci, h in enumerate(["Original ID","Masked ID","Original Name","Masked Name"], 1):
+        for ci, h in enumerate(["原始編號","匿名編號","原始名稱","匿名名稱"], 1):
             ws.cell(row=row, column=ci, value=h).font = Font(bold=True)
         row += 1
 
@@ -249,7 +249,7 @@ def _add_mapping_sheet(wb, col_maps, cust_agg, prod_agg, fact_agg):
 
         for orig_id, anon_id in id_map.items():
             idx = list(id_map.keys()).index(orig_id)
-            anon_nm = f"{'Customer ' if id_key=='cusno' else 'Product ' if id_key=='prdno' else 'Supplier '}{_idx_to_letters(idx)}"
+            anon_nm = f"{'客戶 ' if id_key=='cusno' else '商品 ' if id_key=='prdno' else '供應商 '}{_idx_to_letters(idx)}"
             orig_nm = nm_rev.get(anon_nm, "")
             ws.cell(row=row, column=1, value=orig_id)
             ws.cell(row=row, column=2, value=anon_id)
@@ -364,7 +364,7 @@ def main():
     print("\nSheets:")
     for ws in wb.worksheets:
         print(f"   {ws.title}")
-    print("\nBefore sharing externally, delete the 'Mapping (Confidential)' sheet!")
+    print("\nBefore sharing externally, delete the '對照表（機密）' sheet!")
     input("\nPress Enter to exit...")
 
 
