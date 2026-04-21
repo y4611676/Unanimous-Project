@@ -14,10 +14,9 @@ Ships with 21 pytest cases and two real-world example configs (sales, telco chur
 
 | Project | Domain | Stack | Key Finding |
 |---|---|---|---|
-| [Safe Haven Index](./Safe_Haven_Index/) | Geopolitics / International | Python, Streamlit, Plotly, World Bank API | **Interactive dashboard** ranking 61 countries on six weighted indicators; equal-weight Top 5 = Australia / Canada / NZ / Norway / Ireland, sliders re-rank live |
-| [Telco Customer Churn](./Telco-Customer-Churn/) | Telecom | Python, Pandas, Seaborn | **$139K/month revenue at risk**; month-to-month customers churn at 42.7% (15× vs. two-year contracts), electronic check users churn at 45% |
+| [Safe Haven Index](./Safe_Haven_Index/) | Geopolitics / International | Python, Streamlit, Plotly, scikit-learn, World Bank API | **Interactive dashboard** ranking 61 countries on six weighted indicators; equal-weight Top 5 = Australia / Canada / NZ / Norway / Ireland, sliders re-rank live; k-means clustering surfaces "similar countries" shortlists |
+| [Telco Customer Churn](./Telco-Customer-Churn/) | Telecom | Python, Pandas, scikit-learn, Streamlit | **$139K/month revenue at risk**; month-to-month customers churn at 42.7% (15× vs. two-year contracts); three-model benchmark (Logistic Regression / Random Forest / Gradient Boosting) with Streamlit prediction app |
 | [Bike Share](./Bike_Share/) | Shared economy | Python, DuckDB, Matplotlib | **Casual riders average 2× ride duration** of members; only casuals use docked bikes; summer 5–7 PM is the prime conversion window |
-| [Fitabase](./Fitabase/) | Health tech | R, tidyverse, ggplot2 | **81% of the average day is sedentary**, avg sleep only 6.9 hrs, 5–7 PM is the peak push-notification window |
 | [Business Analytics Report](./work/) | Retail / wholesale | Python, Pandas, openpyxl, scikit-learn | **28% of customers drive 65% of sales**, 20 loss-making SKUs, 64% of items are out-of-stock; ships as two six-step pipelines ([quarterly](./work/quarterly_analysis/) / [annual](./work/annual_analysis/)) producing four Excel reports each |
 
 ## Framework × Case Studies
