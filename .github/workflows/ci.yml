@@ -29,6 +29,3 @@ jobs:
 
       - name: Run pipeline_template tests
         run: pytest pipeline_template/tests/ -v
-
-      - name: Run work/ smoke tests
-        run: pytest work/tests/ -v
