@@ -175,6 +175,8 @@ def anomaly_detection(sale_full: pd.DataFrame) -> pd.DataFrame:
         return pd.DataFrame()
 
     df["flag"] = ""
+    # Map internal column names to Chinese labels shown in the report's 異常欄位 cell
+    flag_label = {"rev": "銷售額", "prqty": "數量", "price": "單價"}
     for col in numeric_cols:
         df[col] = pd.to_numeric(df[col], errors="coerce")
         # Compute bounds on non-null values only, otherwise quantile is NaN
@@ -185,11 +187,12 @@ def anomaly_detection(sale_full: pd.DataFrame) -> pd.DataFrame:
         iqr = q3 - q1
         lo, hi = q1 - 1.5 * iqr, q3 + 1.5 * iqr
         mask = (df[col] < lo) | (df[col] > hi)
-        # Append the column name to the flag so users see WHY a row was caught
+        # Append the Chinese label so users see WHY a row was caught
+        label = flag_label.get(col, col)
         df.loc[mask, "flag"] = df.loc[mask, "flag"].where(
             df.loc[mask, "flag"] == "",
-            df.loc[mask, "flag"] + ","
-        ) + col
+            df.loc[mask, "flag"] + "、"
+        ) + label
 
     # Keep only anomalies and the columns users actually care about
     flagged = df[df["flag"] != ""].copy()

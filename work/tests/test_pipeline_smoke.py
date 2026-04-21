@@ -241,7 +241,7 @@ def test_step5_anomaly_detection():
     result = anomaly_detection(sale_full)
     assert len(result) == 1
     assert result.iloc[0]["salno"] == "S19"
-    assert "rev" in result.iloc[0]["flag"] or "prqty" in result.iloc[0]["flag"]
+    assert "銷售額" in result.iloc[0]["flag"] or "數量" in result.iloc[0]["flag"]
 
 
 def test_step5_market_basket():
