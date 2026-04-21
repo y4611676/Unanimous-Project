@@ -15,6 +15,7 @@ from pathlib import Path
 import pandas as pd
 import streamlit as st
 
+from src.clustering import fit_clusters, similar_countries
 from src.indicators import INDICATOR_FUNCS, INDICATOR_LABELS, build_all
 from src.scoring import compute_index
 
@@ -94,8 +95,8 @@ col2.metric("Top country", ranked.iloc[0]["country"], f"{ranked.iloc[0]['safe_ha
 total_weight = sum(max(0, w) for w in weights.values())
 col3.metric("Active weight", f"{total_weight:.1f}")
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    ["🏆 Rankings", "🗺️ Map", "📊 Indicator profile", "ℹ️ About"]
+tab1, tab2, tab3, tab_cluster, tab4 = st.tabs(
+    ["🏆 Rankings", "🗺️ Map", "📊 Indicator profile", "🧬 Similar countries", "ℹ️ About"]
 )
 
 # Tab 1: ranked table ---------------------------------------------------------
@@ -171,6 +172,70 @@ with tab3:
         st.bar_chart(profile.set_index("indicator"))
 
     st.caption(f"Data completeness: {row['data_completeness']:.0%}")
+
+# Tab: clustering — similar countries ---------------------------------------
+with tab_cluster:
+    st.markdown(
+        "**Which countries behave similarly?** Rankings depend on your "
+        "weights; clustering doesn't. If you like one country's indicator "
+        "*profile*, here are its closest neighbours in the six-dimensional "
+        "space — useful as a relocation / market-entry shortlist."
+    )
+
+    k = st.slider("Number of clusters (k)", 3, 7, 5,
+                  help="Silhouette scores peak around k=4–5 on this dataset.")
+
+    clustered = fit_clusters(ranked, k=k)
+
+    anchor = st.selectbox(
+        "Pick an anchor country — we'll find the 5 closest in profile:",
+        clustered["country"].tolist(),
+    )
+
+    nearest = similar_countries(clustered, anchor, n=5)
+
+    anchor_row = clustered[clustered["country"] == anchor].iloc[0]
+    st.caption(
+        f"**{anchor}** · cluster {int(anchor_row['cluster'])} — "
+        f"*{anchor_row['cluster_label']}*"
+    )
+
+    neighbour_cols = ["country", "region", "safe_haven_score", "cluster",
+                      "cluster_label", "distance"]
+    neighbour_cols = [c for c in neighbour_cols if c in nearest.columns]
+    st.dataframe(
+        nearest[neighbour_cols].rename(columns={
+            "safe_haven_score": "Score",
+            "cluster_label": "Cluster profile",
+            "distance": "Profile distance",
+        }).style.format({
+            "Score": "{:.1f}",
+            "Profile distance": "{:.2f}",
+        }),
+        use_container_width=True,
+        hide_index=True,
+    )
+
+    st.divider()
+    st.subheader("All clusters at a glance")
+    cluster_summary = (
+        clustered.groupby(["cluster", "cluster_label"])
+        .agg(n=("country", "count"),
+             avg_score=("safe_haven_score", "mean"),
+             members=("country", lambda s: ", ".join(s.head(6).tolist())))
+        .reset_index()
+        .sort_values("avg_score", ascending=False)
+    )
+    st.dataframe(
+        cluster_summary.rename(columns={
+            "cluster_label": "Profile",
+            "n": "Countries",
+            "avg_score": "Avg score",
+            "members": "Examples",
+        }).style.format({"Avg score": "{:.1f}"}),
+        use_container_width=True,
+        hide_index=True,
+    )
 
 # Tab 4: methodology ---------------------------------------------------------
 with tab4:

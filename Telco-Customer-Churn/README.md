@@ -79,9 +79,15 @@ Standalone analysis project using the **IBM Telco Customer Churn** public datase
 .
 ├── src/telco_churn/
 │   ├── __init__.py
-│   └── cleaning.py
+│   ├── cleaning.py          # CSV cleaning (shared with notebook)
+│   ├── features.py          # Feature engineering (tenure buckets, add-on count)
+│   ├── model.py             # sklearn Pipeline: LR / RF / GB benchmark + persist
+│   └── evaluate.py          # ROC / PR / feature importance / threshold sweep
 ├── notebooks/
-│   └── telco_churn_analysis.ipynb
+│   ├── telco_churn_analysis.ipynb    # Exploratory — why do customers churn?
+│   └── 02_modeling.ipynb             # Predictive — can we forecast churn?
+├── app.py                   # Streamlit churn-risk scoring demo
+├── artifacts/               # Persisted model (created by model.py)
 ├── requirements.txt
 └── README.md
 ```
@@ -94,8 +100,34 @@ python -m venv .venv
 # source .venv/bin/activate     # macOS / Linux
 
 pip install -r requirements.txt
-jupyter notebook notebooks/telco_churn_analysis.ipynb
 ```
+
+### Three ways to use this repo
+
+```bash
+# 1. Exploratory analysis
+jupyter notebook notebooks/telco_churn_analysis.ipynb
+
+# 2. Modeling walkthrough (benchmarks LR / RF / GB, picks winner, saves model)
+jupyter notebook notebooks/02_modeling.ipynb
+# or from the CLI:
+python -m telco_churn.model Telco-Customer-Churn.csv
+
+# 3. Interactive churn-risk demo
+streamlit run app.py
+```
+
+### Modeling approach
+
+Three sklearn pipelines benchmarked with 5-fold stratified CV on ROC AUC:
+
+| Model | Why it's here |
+|-------|--------------|
+| Logistic Regression | Interpretable baseline. Coefficients readable by business stakeholders. |
+| Random Forest | Captures non-linear interactions (e.g. tenure × contract type) cheaply. |
+| Gradient Boosting | Usually wins by a small margin; what the Streamlit app ships with. |
+
+Features are standardised (numerics) and one-hot encoded (categoricals) through a single `ColumnTransformer`. Engineered features add tenure buckets, charges-per-month-of-tenure, and an add-on count. See `src/telco_churn/evaluate.py` for ROC, PR, confusion matrix, feature importance, and threshold sweep helpers — the threshold sweep in particular lets you pick an operating point that matches the business cost of a false positive (wasted retention offer) vs. false negative (missed churner).
 
 ### Analysis Focus
 

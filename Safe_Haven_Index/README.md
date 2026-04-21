@@ -87,6 +87,7 @@ Interactive Streamlit dashboard that scores countries on six global indicators a
 - **Rankings tab**: sortable table with red-yellow-green heat map overlay
 - **Map tab**: Plotly choropleth world map coloured by composite score
 - **Indicator profile tab**: polar / radar chart for any single country across all six dimensions
+- **Similar countries tab**: k-means clustering (scikit-learn) — pick an anchor country and see the 5 closest profile neighbours plus the full cluster map. Rankings change when you move the sliders; clustering doesn't, which makes it the right lens for "find countries that behave like this one."
 - **Sidebar**: six weight sliders + 4 presets (Equal / Security / Lifestyle / Economic)
 
 ### Quick start
@@ -147,7 +148,8 @@ Safe_Haven_Index/
 └── src/
     ├── fetch.py                # WB API client + offline fallback
     ├── indicators.py           # 6 indicators with 0-100 normalisation
-    └── scoring.py              # Weighted composite + ranking
+    ├── scoring.py              # Weighted composite + ranking
+    └── clustering.py           # K-means clusters + nearest-profile lookup
 ```
 
 ### Design Trade-offs

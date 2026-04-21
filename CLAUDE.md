@@ -4,7 +4,7 @@ Business analytics portfolio with a reusable ETL pipeline framework and multiple
 
 ## Project Structure
 
-- `work/` — Hand-written 4-step ETL pipeline (clean → aggregate → analyze → anonymize) for retail/wholesale data
+- `work/` — Hand-written 6-step ETL pipeline for retail/wholesale ERP data, split into two cadence variants (`quarterly_analysis/`, `annual_analysis/`) sharing step1–step5; step6 differs per cadence (QoQ vs YoY executive summary)
 - `pipeline_template/` — Generalized config-driven (YAML) ETL framework with tests
 - `Safe_Haven_Index/` — Geopolitical risk dashboard (Streamlit)
 - `Telco-Customer-Churn/` — Telecom churn analysis
@@ -24,25 +24,27 @@ pip install -r requirements.txt
 ```bash
 # Pipeline template tests
 pytest pipeline_template/tests/ -v
-
-# Work pipeline smoke tests
-pytest work/tests/ -v
 ```
 
 ### Work Pipeline
 
-The `work/` pipeline runs in 5 sequential steps (step5 is optional):
+`work/` ships two cadence variants that share step1–step5 and differ only at step6:
+
+- `work/quarterly_analysis/pipeline/` — QoQ executive summary at step6
+- `work/annual_analysis/pipeline/` — YoY executive summary at step6
+
+Each variant runs in 6 sequential steps (step5 and step6 are optional):
 
 ```bash
-cd work
-python step1_clean.py <csv_folder>                  # Clean raw CSVs
-python step2_aggregate.py <csv_folder>/cleaned      # Build aggregate tables
-python step3_analyze.py <csv_folder>/aggregated     # Basic report (RFM, Pareto, GP, inventory)
-python step4_anonymize.py <csv_folder>/aggregated   # De-identified version of basic report
-python step5_advanced.py <csv_folder>/aggregated    # Advanced analytics (optional)
-```
+cd work/quarterly_analysis/pipeline   # or work/annual_analysis/pipeline
 
-Sample data is available in `work/sample_data/` for testing.
+python step1_clean.py                 # Clean raw CSVs (prompts for folder path)
+python step2_aggregate.py             # Build aggregate tables
+python step3_analyze.py               # Main report (RFM, Pareto, GP, inventory)
+python step4_anonymize.py             # De-identified version of main report
+python step5_advanced.py              # Advanced analytics (optional)
+python step6_executive_summary.py     # One-page executive summary (optional)
+```
 
 ### Advanced Analytics (step5)
 

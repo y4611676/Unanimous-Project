@@ -6,9 +6,9 @@ A config-driven four-stage ETL template:
 clean  →  aggregate  →  analyze  →  anonymize  →  Excel report
 ```
 
-**Motivation**: the four scripts under `work/` (`step1_clean.py` → `step4_anonymize.py`) are a complete, working pipeline — but file names, column names, and business logic are all hard-coded in Python. Swapping in a different dataset would require rewriting 60–70% of the code.
+**Motivation**: the pipeline scripts under `work/{quarterly,annual}_analysis/pipeline/` (`step1_clean.py` → `step4_anonymize.py`, plus `step5_advanced.py` / `step6_executive_summary.py` for domain-specific extras) are a complete, working pipeline — but file names, column names, and business logic are all hard-coded in Python. Swapping in a different dataset would require rewriting 60–70% of the code.
 
-This template pulls everything each stage needs to *know* out into a YAML config. The Python code itself is no longer bound to any specific field name.
+This template pulls everything each stage needs to *know* out into a YAML config. The Python code itself is no longer bound to any specific field name. The template covers the first four stages (clean / aggregate / analyze / anonymize) — `work/`'s step5 and step6 remain domain-specific sales analytics that sit on top of the generic engine.
 
 ---
 
@@ -62,7 +62,7 @@ See [`config.example.yaml`](./config.example.yaml) for a fully-commented walkthr
 The repo ships two example configs — **the same engine drives both**, only the YAML differs:
 
 ### `examples/sales_report/` — Business analytics report
-A YAML description of every CSV, column, gross-margin calculation, RFM, Pareto, and de-identification rule that was hard-coded in `work/step1`–`step4`, plus a 7-sheet Excel export.
+A YAML description of every CSV, column, gross-margin calculation, RFM, Pareto, and de-identification rule that was hard-coded in `work/`'s step1–step4, plus a 7-sheet Excel export.
 
 ```bash
 cd examples/sales_report
@@ -85,7 +85,7 @@ The two schemas are entirely different (retail sales vs. telecom), yet the same 
 ## Design principles
 
 1. **The code doesn't know what your columns are called** — every field name is injected via config. The engine only operates on abstractions like "how many columns", "what to group by", "which columns are monetary"
-2. **Missing data doesn't crash the pipeline** — missing CSV, missing column, missing metric all generate a warning and are skipped, matching the `if not df.empty` defensive style in the original `work/step1`
+2. **Missing data doesn't crash the pipeline** — missing CSV, missing column, missing metric all generate a warning and are skipped, matching the `if not df.empty` defensive style in the original `work/` step1
 3. **Stages run independently** — each stage reads the previous stage's CSVs, so you don't need to run the whole pipeline end-to-end
 4. **De-identification is opt-in** — remove the `anonymization:` block from the config and the stage is skipped entirely
 
